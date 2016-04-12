@@ -1,0 +1,9 @@
+Debug/
+.settings/
+.launches/
+Objects/
+.ccsproject
+.cproject
+.project
+
+
