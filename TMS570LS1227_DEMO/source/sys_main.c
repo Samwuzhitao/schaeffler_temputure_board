@@ -50,6 +50,7 @@
 #include "sys_vim.h"
 #include "CanProtocol.h"
 #include "spi.h"
+#include "ADS1247.h"
 
 /* USER CODE END */
 
@@ -60,6 +61,8 @@
 /* USER CODE BEGIN (1) */
 #define DELAY_VALUE           10000000
 #define CAN_DATA_BUFFER_LEN   64
+
+extern spiDAT1_t dataconfig1_t;
 
 uint8 can_sent_buffer_data[CAN_DATA_BUFFER_LEN];
 uint8 can_receive_buffer_data[CAN_DATA_BUFFER_LEN*8];
@@ -83,15 +86,6 @@ void main(void)
     volatile unsigned long int i,j;
 //    uint32 status,tmpid,tmpIdType;
 //	CAN_EXTSTDIDTypedef CanId;
-	spiDAT1_t dataconfig1_t;
-	uint16 TX_Data = 0x55;
-
-	dataconfig1_t.CS_HOLD = FALSE;
-	dataconfig1_t.WDEL    = TRUE;
-	dataconfig1_t.DFSEL   = SPI_FMT_0;
-	dataconfig1_t.CSNR    = 0xFE;
-
-
 
 	sciInit();
 	canInit();
@@ -116,15 +110,21 @@ void main(void)
 		can_receive_buffer_data[j] = 0;
 	}
 */
+	//spiEnableLoopback(spiREG1, Analog_Lbk);
+	ADS1247_Init();
+
+
 	while(1)
 	{
+		float x;
+
 		Can_Process();
 
 		/* Initiate SPI2 Transmit and Receive through Interrupt Mode */
-		spiTransmitData(spiREG1, &dataconfig1_t, 1, &TX_Data);
+		//spiTransmitData(spiREG1, &dataconfig1_t, 1, &TX_Data);
 
 		/* Initiate SPI1 Transmit and Receive through Polling Mode*/
-		spiTransmitData(spiREG3, &dataconfig1_t, 1, &TX_Data);
+		//spiTransmitData(spiREG3, &dataconfig1_t, 1, &TX_Data);
 
 		/*
 		printf("Massage box%2d id = %8x idtype = %1d \r\n", 1, canGetID(canREG3, 1) , canGetIDType(canREG3, 1));
@@ -132,7 +132,29 @@ void main(void)
 		status = canTransmit(canREG3, 1, &(can_sent_buffer_data[0]));
 		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, tmpid>>18, tmpIdType, status);
 		*/
+
+		//spiTransmitAndReceiveData(spiREG1, &dataconfig1_t, 1, &data, &ReadData);
+		//ReadData = ADS1247_ReadWriteData(data);
+		//ADS1247_WriteRegister(i,0x02);
+
+
+		ADS1247_Init();
+
+		for(i=0;i<0x0F;i++)
+		{
+			printf("The ADS1247 Read Address %2x Register Value is : %2x \r\n",i,ADS1247_ReadRegister(i));
+			ADS1247_Delay(20);
+		}
+
+
+		x = ADS1247_ReadData();
+
+		printf("The ADS1247 Read Value is : %x \r\n",x);
+
+		printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
+
 		for (i = 0; i < DELAY_VALUE; i++);
+
 	}
 /* USER CODE END */
 }
