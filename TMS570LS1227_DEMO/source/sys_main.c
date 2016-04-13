@@ -49,6 +49,7 @@
 #include "can.h"
 #include "sys_vim.h"
 #include "CanProtocol.h"
+#include "spi.h"
 
 /* USER CODE END */
 
@@ -79,12 +80,22 @@ uint8 can_receive_buffer_data[CAN_DATA_BUFFER_LEN*8];
 void main(void)
 {
 /* USER CODE BEGIN (3) */
-//    volatile unsigned long int i,j;
+    volatile unsigned long int i,j;
 //    uint32 status,tmpid,tmpIdType;
 //	CAN_EXTSTDIDTypedef CanId;
+	spiDAT1_t dataconfig1_t;
+	uint16 TX_Data = 0x55;
+
+	dataconfig1_t.CS_HOLD = FALSE;
+	dataconfig1_t.WDEL    = TRUE;
+	dataconfig1_t.DFSEL   = SPI_FMT_0;
+	dataconfig1_t.CSNR    = 0xFE;
+
+
 
 	sciInit();
 	canInit();
+	spiInit();
 	canEnableErrorNotification(canREG3);
 //	canEnableloopback(canREG3,Internal_Lbk);
 
@@ -108,13 +119,20 @@ void main(void)
 	while(1)
 	{
 		Can_Process();
+
+		/* Initiate SPI2 Transmit and Receive through Interrupt Mode */
+		spiTransmitData(spiREG1, &dataconfig1_t, 1, &TX_Data);
+
+		/* Initiate SPI1 Transmit and Receive through Polling Mode*/
+		spiTransmitData(spiREG3, &dataconfig1_t, 1, &TX_Data);
+
 		/*
 		printf("Massage box%2d id = %8x idtype = %1d \r\n", 1, canGetID(canREG3, 1) , canGetIDType(canREG3, 1));
 		printf("Massage box%2d id = %8x idtype = %1d \r\n", 2, canGetID(canREG3, 2) , canGetIDType(canREG3, 2));
 		status = canTransmit(canREG3, 1, &(can_sent_buffer_data[0]));
 		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, tmpid>>18, tmpIdType, status);
-		for (i = 0; i < DELAY_VALUE; i++);
 		*/
+		for (i = 0; i < DELAY_VALUE; i++);
 	}
 /* USER CODE END */
 }
