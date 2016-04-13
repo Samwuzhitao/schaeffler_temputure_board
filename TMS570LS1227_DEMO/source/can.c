@@ -71,9 +71,8 @@
 
 /* USER CODE BEGIN (2) */
 CanMsg RxMessage;
-
 uint8 canGetIDType(canBASE_t *node, uint32 messageBox);
-
+uint8 canRxFlag = 0;
 /* USER CODE END */
 
 
@@ -1484,7 +1483,18 @@ void can3HighLevelInterrupt(void)
 		CAN_MessageGet(&RxMessage);
 	}
 
-	//gioToggleBit(gioPORTB, 2);
+	if(canRxFlag)
+	{
+		canIoSetPort(canREG1, 0, 0);
+		canIoSetPort(canREG2, 0, 0);
+		canRxFlag = 0;
+	}
+	else
+	{
+		canIoSetPort(canREG1, 1, 1);
+		canIoSetPort(canREG2, 1, 1);
+		canRxFlag = 1;
+	}
 /* USER CODE END */
 
 }
