@@ -51,6 +51,8 @@
 #include "CanProtocol.h"
 #include "spi.h"
 #include "ADS1247.h"
+#include "gio.h"
+#include "het.h"
 
 /* USER CODE END */
 
@@ -87,6 +89,8 @@ void main(void)
 //    uint32 status,tmpid,tmpIdType;
 //	CAN_EXTSTDIDTypedef CanId;
 
+    gioInit();
+    hetInit();
 	sciInit();
 	canInit();
 	spiInit();
@@ -111,12 +115,16 @@ void main(void)
 	}
 */
 	//spiEnableLoopback(spiREG1, Analog_Lbk);
-	ADS1247_Init();
+	//spiEnableLoopback(spiREG3, Analog_Lbk);
+	AdcInit();
 
 
 	while(1)
 	{
-		float x;
+		uint32 x;
+		uint16 data,ReadData;
+
+		data = 0x55;
 
 		Can_Process();
 
@@ -132,26 +140,42 @@ void main(void)
 		status = canTransmit(canREG3, 1, &(can_sent_buffer_data[0]));
 		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, tmpid>>18, tmpIdType, status);
 		*/
-
 		//spiTransmitAndReceiveData(spiREG1, &dataconfig1_t, 1, &data, &ReadData);
+		//spiTransmitAndReceiveData(spiREG3, &dataconfig1_t, 1, &data, &ReadData);
+		//printf("spiTransmitAndReceiveData Loopback Value is : %2x \r\n", ReadData);
 		//ReadData = ADS1247_ReadWriteData(data);
 		//ADS1247_WriteRegister(i,0x02);
 
 
-		ADS1247_Init();
-
+		//ADS1247_Init();
+		/*
 		for(i=0;i<0x0F;i++)
 		{
-			printf("The ADS1247 Read Address %2x Register Value is : %2x \r\n",i,ADS1247_ReadRegister(i));
+			spiClearCs(spiREG3, 0);
+			ADS1247_ReadWriteData( ADS1247_CMD_RESET );
+			spiSetCs(spiREG3, 0);
+			ADS1247_Delay(60);
+
+			ADS1247_WriteRegister( ADS1247_REG_MUX0, 0x0A );
 			ADS1247_Delay(20);
+			x = ADS1247_ReadRegister(ADS1247_REG_MUX0);
+			printf("ADS1247_REG_MUX0 Register Value is : %2x \r\n", x);
+			ADS1247_Delay(20);
+		}
+		*/
+
+		while(1)
+		{
+			int i;
+			for (i=0; i<16; i++)
+			{
+				AdcReadData(i);
+				printf("The ADS1247 Read Value is : %x \r\n",x);
+			}
 		}
 
 
-		x = ADS1247_ReadData();
-
-		printf("The ADS1247 Read Value is : %x \r\n",x);
-
-		printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
+		//printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
 
 		for (i = 0; i < DELAY_VALUE; i++);
 

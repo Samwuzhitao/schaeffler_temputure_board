@@ -10,11 +10,29 @@
 
 #include "sys_common.h"
 #include "spi.h"
+#include "gio.h"
+#include "het.h"
 
  /* Private typedef -----------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
+#define LV138CH1_EN_1  hetREG1->DOUT  |= (uint32)((uint32)1U << 20U)   /* PIN141 */
+#define LV138CH1_EN_0  hetREG1->DOUT  &=~(uint32)((uint32)1U << 20U)
+#define LV138CH1_A0_1  gioPORTA->DOUT |= (uint32)((uint32)1U << 7U)    /* PIN22 */
+#define LV138CH1_A0_0  gioPORTA->DOUT &=~(uint32)((uint32)1U << 7U)
+#define LV138CH1_A1_1  gioPORTA->DOUT |= (uint32)((uint32)1U << 6U)    /* PIN16 */
+#define LV138CH1_A1_0  gioPORTA->DOUT &=~(uint32)((uint32)1U << 6U)
+#define LV138CH1_A2_1  gioPORTA->DOUT |= (uint32)((uint32)1U << 2U)    /* PIN9 */
+#define LV138CH1_A2_0  gioPORTA->DOUT &=~(uint32)((uint32)1U << 2U)
 
+#define LV138CH2_EN_1  spiREG5->PC3   |= (uint32)((uint32)1U << 8U)    /* PIN97  */
+#define LV138CH2_EN_0  spiREG5->PC3   &=~(uint32)((uint32)1U << 8U)
+#define LV138CH2_A0_1  spiREG5->PC3   |= (uint32)((uint32)1U << 9U)    /* PIN100 */
+#define LV138CH2_A0_0  spiREG5->PC3   &=~(uint32)((uint32)1U << 9U)
+#define LV138CH2_A1_1  spiREG5->PC3   |= (uint32)((uint32)1U << 10U)   /* PIN99  */
+#define LV138CH2_A1_0  spiREG5->PC3   &=~(uint32)((uint32)1U << 10U)
+#define LV138CH2_A2_1  spiREG5->PC3   |= (uint32)((uint32)1U << 11U)   /* PIN98  */
+#define LV138CH2_A2_0  spiREG5->PC3   &=~(uint32)((uint32)1U << 11U)
 
 /* REGISTER ADDRESS */
 #define ADS1247_REG_MUX0                 0x00 ///< Multiplexer Control Register 0
@@ -61,13 +79,21 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-uint8_t ADS1247_ReadWriteData(uint8_t data);
-uint8_t ADS1247_ReadRegister( uint8_t addr );
-void ADS1247_ReadRegisters( uint8_t addr, uint8_t num, uint8_t data[] );
-void ADS1247_WriteRegister( uint8_t addr, int8_t data );
-void ADS1247_WriteRegisters( uint8_t addr, uint8_t num, uint8_t data[] );
-uint32_t ADS1247_ReadData( void );
-void ADS1247_Init( void );
-void ADS1247_Delay(unsigned int nCount);
+void SpiSetCs( spiBASE_t *spi, uint8 nCs );
+void SpiClearCs( spiBASE_t *spi, uint8 nCs );
+uint8_t SpiReadWriteData( spiBASE_t *spi, uint8_t data );
+
+void Ads1247Delay( uint32 nCount );
+uint8_t Ads1247ReadRegister( spiBASE_t *spi, uint8_t addr );
+void Ads1247WriteRegister( spiBASE_t *spi, uint8_t addr, int8_t data );
+void Ads1247ReadRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] );
+void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] );
+
+void Ads1247Init( spiBASE_t *spi );
+uint32_t Ads1247ReadData( spiBASE_t *spi );
+
+void AdcInit( void );
+spiBASE_t *AdcChannelSet( uint8 Ch );
+uint32_t AdcReadData( uint8 Ch );
 
 #endif /* TMS570LS1227_DEMO_APP_ADS1247_H_ */

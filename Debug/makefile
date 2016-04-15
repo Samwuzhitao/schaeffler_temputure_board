@@ -11,9 +11,11 @@ ORDERED_OBJS += \
 "./TMS570LS1227_DEMO/source/dabort.obj" \
 "./TMS570LS1227_DEMO/source/esm.obj" \
 "./TMS570LS1227_DEMO/source/gio.obj" \
+"./TMS570LS1227_DEMO/source/het.obj" \
 "./TMS570LS1227_DEMO/source/notification.obj" \
 "./TMS570LS1227_DEMO/source/pinmux.obj" \
 "./TMS570LS1227_DEMO/source/sci.obj" \
+"./TMS570LS1227_DEMO/source/spi.obj" \
 "./TMS570LS1227_DEMO/source/sys_core.obj" \
 "./TMS570LS1227_DEMO/source/sys_dma.obj" \
 "./TMS570LS1227_DEMO/source/sys_intvecs.obj" \
@@ -27,6 +29,7 @@ ORDERED_OBJS += \
 "./TMS570LS1227_DEMO/source/sys_startup.obj" \
 "./TMS570LS1227_DEMO/source/sys_vim.obj" \
 "./TMS570LS1227_DEMO/source/system.obj" \
+"./TMS570LS1227_DEMO/App/ADS1247.obj" \
 "./TMS570LS1227_DEMO/App/CanProtocol.obj" \
 "./TMS570LS1227_DEMO/App/printf.obj" \
 "../TMS570LS1227_DEMO/source/sys_link.cmd" \
@@ -170,8 +173,8 @@ TMS570LS1227_DEMO.txt: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "TMS570LS1227_DEMO\source\can.pp" "TMS570LS1227_DEMO\source\esm.pp" "TMS570LS1227_DEMO\source\gio.pp" "TMS570LS1227_DEMO\source\notification.pp" "TMS570LS1227_DEMO\source\pinmux.pp" "TMS570LS1227_DEMO\source\sci.pp" "TMS570LS1227_DEMO\source\sys_dma.pp" "TMS570LS1227_DEMO\source\sys_main.pp" "TMS570LS1227_DEMO\source\sys_pcr.pp" "TMS570LS1227_DEMO\source\sys_phantom.pp" "TMS570LS1227_DEMO\source\sys_pmm.pp" "TMS570LS1227_DEMO\source\sys_selftest.pp" "TMS570LS1227_DEMO\source\sys_startup.pp" "TMS570LS1227_DEMO\source\sys_vim.pp" "TMS570LS1227_DEMO\source\system.pp" "TMS570LS1227_DEMO\App\CanProtocol.pp" "TMS570LS1227_DEMO\App\printf.pp" 
-	-$(RM) "TMS570LS1227_DEMO\source\can.obj" "TMS570LS1227_DEMO\source\dabort.obj" "TMS570LS1227_DEMO\source\esm.obj" "TMS570LS1227_DEMO\source\gio.obj" "TMS570LS1227_DEMO\source\notification.obj" "TMS570LS1227_DEMO\source\pinmux.obj" "TMS570LS1227_DEMO\source\sci.obj" "TMS570LS1227_DEMO\source\sys_core.obj" "TMS570LS1227_DEMO\source\sys_dma.obj" "TMS570LS1227_DEMO\source\sys_intvecs.obj" "TMS570LS1227_DEMO\source\sys_main.obj" "TMS570LS1227_DEMO\source\sys_mpu.obj" "TMS570LS1227_DEMO\source\sys_pcr.obj" "TMS570LS1227_DEMO\source\sys_phantom.obj" "TMS570LS1227_DEMO\source\sys_pmm.obj" "TMS570LS1227_DEMO\source\sys_pmu.obj" "TMS570LS1227_DEMO\source\sys_selftest.obj" "TMS570LS1227_DEMO\source\sys_startup.obj" "TMS570LS1227_DEMO\source\sys_vim.obj" "TMS570LS1227_DEMO\source\system.obj" "TMS570LS1227_DEMO\App\CanProtocol.obj" "TMS570LS1227_DEMO\App\printf.obj" 
+	-$(RM) "TMS570LS1227_DEMO\source\can.pp" "TMS570LS1227_DEMO\source\esm.pp" "TMS570LS1227_DEMO\source\gio.pp" "TMS570LS1227_DEMO\source\het.pp" "TMS570LS1227_DEMO\source\notification.pp" "TMS570LS1227_DEMO\source\pinmux.pp" "TMS570LS1227_DEMO\source\sci.pp" "TMS570LS1227_DEMO\source\spi.pp" "TMS570LS1227_DEMO\source\sys_dma.pp" "TMS570LS1227_DEMO\source\sys_main.pp" "TMS570LS1227_DEMO\source\sys_pcr.pp" "TMS570LS1227_DEMO\source\sys_phantom.pp" "TMS570LS1227_DEMO\source\sys_pmm.pp" "TMS570LS1227_DEMO\source\sys_selftest.pp" "TMS570LS1227_DEMO\source\sys_startup.pp" "TMS570LS1227_DEMO\source\sys_vim.pp" "TMS570LS1227_DEMO\source\system.pp" "TMS570LS1227_DEMO\App\ADS1247.pp" "TMS570LS1227_DEMO\App\CanProtocol.pp" "TMS570LS1227_DEMO\App\printf.pp" 
+	-$(RM) "TMS570LS1227_DEMO\source\can.obj" "TMS570LS1227_DEMO\source\dabort.obj" "TMS570LS1227_DEMO\source\esm.obj" "TMS570LS1227_DEMO\source\gio.obj" "TMS570LS1227_DEMO\source\het.obj" "TMS570LS1227_DEMO\source\notification.obj" "TMS570LS1227_DEMO\source\pinmux.obj" "TMS570LS1227_DEMO\source\sci.obj" "TMS570LS1227_DEMO\source\spi.obj" "TMS570LS1227_DEMO\source\sys_core.obj" "TMS570LS1227_DEMO\source\sys_dma.obj" "TMS570LS1227_DEMO\source\sys_intvecs.obj" "TMS570LS1227_DEMO\source\sys_main.obj" "TMS570LS1227_DEMO\source\sys_mpu.obj" "TMS570LS1227_DEMO\source\sys_pcr.obj" "TMS570LS1227_DEMO\source\sys_phantom.obj" "TMS570LS1227_DEMO\source\sys_pmm.obj" "TMS570LS1227_DEMO\source\sys_pmu.obj" "TMS570LS1227_DEMO\source\sys_selftest.obj" "TMS570LS1227_DEMO\source\sys_startup.obj" "TMS570LS1227_DEMO\source\sys_vim.obj" "TMS570LS1227_DEMO\source\system.obj" "TMS570LS1227_DEMO\App\ADS1247.obj" "TMS570LS1227_DEMO\App\CanProtocol.obj" "TMS570LS1227_DEMO\App\printf.obj" 
 	-$(RM) "TMS570LS1227_DEMO\source\dabort.pp" "TMS570LS1227_DEMO\source\sys_core.pp" "TMS570LS1227_DEMO\source\sys_intvecs.pp" "TMS570LS1227_DEMO\source\sys_mpu.pp" "TMS570LS1227_DEMO\source\sys_pmu.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '

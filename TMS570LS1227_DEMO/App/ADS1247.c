@@ -11,51 +11,72 @@
 
 spiDAT1_t dataconfig1_t;
 
-void spiSetCs(spiBASE_t *spi, uint8 nCs)
+/******************************************************************************
+  Function:
+  	  SpiSetCs
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void SpiSetCs( spiBASE_t *spi, uint8 nCs )
 {
 	spi->PC3 |=    (uint32)((uint32)1U << nCs) ; /* SCS[0] */
 }
 
-void spiClearCs(spiBASE_t *spi, uint8 nCs)
+/******************************************************************************
+  Function:
+  	  SpiClearCs
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void SpiClearCs( spiBASE_t *spi, uint8 nCs )
 {
 	spi->PC3 &=   ~(uint32)((uint32)1U << nCs) ; /* SCS[0] */
 }
 
 /******************************************************************************
-  Function:ADS1247_ReadWriteData
+  Function:
+  	  SpiReadWriteData
   Description:
   Input:None
   Output:
   Return:
   Others:None
 ******************************************************************************/
-uint8_t ADS1247_ReadWriteData( uint8_t data )
+uint8_t SpiReadWriteData( spiBASE_t *spi, uint8_t data )
 {
 	uint16 Writedata,ReadData;
 
 	Writedata = data;
 
-	spiTransmitAndReceiveData(spiREG1, &dataconfig1_t, 1, &Writedata, &ReadData);
+	spiTransmitAndReceiveData( spi, &dataconfig1_t, 1, &Writedata, &ReadData );
 
 	return ReadData;
 }
 
 /******************************************************************************
-  Function:ADS1247_Delay
+  Function:
+  	  SpiDelay
   Description:
   Input:None
   Output:
   Return:
   Others:None
 ******************************************************************************/
-void ADS1247_Delay(unsigned int nCount)
+void Ads1247Delay( uint32 nCount )
 {
-	volatile unsigned int i,j;
+	volatile uint32 i,j;
 	for(i = nCount; i > 0 ;i--)
 		for(j = 10000; j > 0; j--);
 }
 /******************************************************************************
-  Function:ADS1247_ReadRegister
+  Function:
+  	  Ads1247ReadRegisters
   Description:
   Input:
 		addr : Start register adddress (0 to 15)
@@ -64,26 +85,27 @@ void ADS1247_Delay(unsigned int nCount)
   Return:
   Others:None
 ******************************************************************************/
-void ADS1247_ReadRegisters( uint8_t addr, uint8_t num, uint8_t data[] )
+void Ads1247ReadRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] )
 {
 	uint8_t i;
 
-	spiClearCs(spiREG1, 0);
+	SpiClearCs( spi, 0 );
 
-	ADS1247_ReadWriteData( addr | ADS1247_CMD_RREG );
+	SpiReadWriteData( spi, addr | ADS1247_CMD_RREG );
 
-	ADS1247_ReadWriteData( num );
+	SpiReadWriteData( spi, num );
 
 	for(i=0; i<num+1; i++)
 	{
-		data[i] = ADS1247_ReadWriteData(ADS1247_CMD_NOP);
+		data[i] = SpiReadWriteData( spi, ADS1247_CMD_NOP );
 	}
 
-	spiSetCs(spiREG1, 0);
+	SpiSetCs( spi, 0 );
 }
 
 /******************************************************************************
-  Function:ADS1247_ReadRegister
+  Function:
+  	  spiReadRegister
   Description:
   Input:
 		addr : Start register adddress (0 to 15)
@@ -92,25 +114,25 @@ void ADS1247_ReadRegisters( uint8_t addr, uint8_t num, uint8_t data[] )
   Return:
   Others:None
 ******************************************************************************/
-uint8_t ADS1247_ReadRegister( uint8_t addr )
+uint8_t Ads1247ReadRegister( spiBASE_t *spi, uint8_t addr )
 {
 	uint8_t data;
 
-	spiClearCs(spiREG1, 0);
+	SpiClearCs( spi, 0);
 
-	ADS1247_ReadWriteData( addr | ADS1247_CMD_RREG );
+	SpiReadWriteData( spi, addr | ADS1247_CMD_RREG );
 
-	ADS1247_ReadWriteData( 0x00 );
+	SpiReadWriteData( spi, 0x00 );
 
-	data = ADS1247_ReadWriteData( ADS1247_CMD_NOP );
+	data = SpiReadWriteData( spi, ADS1247_CMD_NOP );
 
 
-	spiSetCs(spiREG1, 0);
+	SpiSetCs( spi, 0);
 
 	return data;
 }
 /******************************************************************************
-  Function:ADS1247_ReadRegister
+  Function:Ads1247ReadRegister
   Description:
   Input:
 		addr : Start register adddress (0 to 15)
@@ -119,26 +141,26 @@ uint8_t ADS1247_ReadRegister( uint8_t addr )
   Return:
   Others:None
 ******************************************************************************/
-void ADS1247_WriteRegisters( uint8_t addr, uint8_t num, uint8_t data[] )
+void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] )
 {
 	uint8_t i;
 
-	spiClearCs(spiREG1, 0);
+	SpiClearCs( spi, 0);
 
-	ADS1247_ReadWriteData( addr | ADS1247_CMD_WREG );
+	SpiReadWriteData( spi, addr | ADS1247_CMD_WREG );
 
-	ADS1247_ReadWriteData( num );
+	SpiReadWriteData( spi, num );
 
 	for(i=0; i<num+1; i++)
 	{
-		 ADS1247_ReadWriteData(data[i]);
+		 SpiReadWriteData( spi, data[i]);
 	}
 
-	spiSetCs(spiREG1, 0);
+	SpiSetCs( spi, 0);
 }
 
 /******************************************************************************
-  Function:ADS1247_ReadRegister
+  Function:Ads1247ReadRegister
   Description:
   Input:
 		addr : Start register adddress (0 to 15)
@@ -147,82 +169,178 @@ void ADS1247_WriteRegisters( uint8_t addr, uint8_t num, uint8_t data[] )
   Return:
   Others:None
 ******************************************************************************/
-void ADS1247_WriteRegister( uint8_t addr, int8_t data )
+void Ads1247WriteRegister( spiBASE_t *spi, uint8_t addr, int8_t data )
 {
-	spiClearCs(spiREG1, 0);
+	SpiClearCs( spi, 0);
 
-	ADS1247_ReadWriteData( addr | ADS1247_CMD_WREG );
+	SpiReadWriteData( spi, addr | ADS1247_CMD_WREG );
 
-	ADS1247_ReadWriteData( 0x00 );
+	SpiReadWriteData( spi, 0x00 );
 
-	ADS1247_ReadWriteData( data );
+	SpiReadWriteData( spi, data );
 
-	spiSetCs(spiREG1, 0);
+	SpiSetCs( spi, 0);
 }
 /******************************************************************************
-  Function:ADS1247_ReadWriteData
+  Function:SpiReadWriteData
   Description:
   Input:None
   Output:
   Return:
   Others:None
 ******************************************************************************/
-void ADS1247_Init( void )
+void Ads1247Init( spiBASE_t *spi )
 {
 	// Reset ADC
-	spiClearCs(spiREG1, 0);
-	ADS1247_ReadWriteData( ADS1247_CMD_RESET );
-	spiSetCs(spiREG1, 0);
-	ADS1247_Delay(60);
+	SpiClearCs( spi, 0);
+	SpiReadWriteData( spi, ADS1247_CMD_RESET );
+	SpiSetCs( spi, 0);
+	Ads1247Delay(60);
 
 	// Positive = IN1 Negitive = IN2
-	ADS1247_WriteRegister( ADS1247_REG_MUX0, 0x0A );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+	Ads1247WriteRegister( spi, ADS1247_REG_MUX0, 0x0A );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 
 	// not Enable Bias voltage
-	ADS1247_WriteRegister( ADS1247_REG_VBIAS, 0x00 );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+	Ads1247WriteRegister( spi, ADS1247_REG_VBIAS, 0x00 );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 
 	// Set Internal OSC, (IDAC)Internal reference, (ADC)OnBoard reference
-	ADS1247_WriteRegister( ADS1247_REG_MUX1, 0x30 );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+	Ads1247WriteRegister( spi, ADS1247_REG_MUX1, 0x30 );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 
 	// Set PGA = 1   DOR = 320SPS
-	ADS1247_WriteRegister( ADS1247_REG_SYS0, 0x06 );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+	Ads1247WriteRegister( spi, ADS1247_REG_SYS0, 0x06 );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 
 	// Set DOUT/(/D/R/D/Y) pin functons only as Data Out
-  // I = 200uA
-	ADS1247_WriteRegister( ADS1247_REG_IDAC0, 0x02 );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+    // I = 200uA
+	Ads1247WriteRegister( spi, ADS1247_REG_IDAC0, 0x02 );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 
 	// Connected the AIN0 and AIN3 pin for the  source DAC
-	ADS1247_WriteRegister( ADS1247_REG_IDAC1, 0x30 );
-	ADS1247_Delay(ADS1247_WRITE_REG_DELAYMS);
+	Ads1247WriteRegister( spi, ADS1247_REG_IDAC1, 0x30 );
+	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 }
 
 /******************************************************************************
-  Function:ADS1247_ReadWriteData
+  Function:SpiReadWriteData
   Description:
   Input:None
   Output:
   Return:
   Others:None
 ******************************************************************************/
-uint32_t ADS1247_ReadData( void )
+uint32_t Ads1247ReadData( spiBASE_t *spi )
 {
 	uint8_t i,Data[3];
 
-	spiClearCs(spiREG1, 0);
+	SpiClearCs( spi, 0);
 
-	ADS1247_ReadWriteData( ADS1247_CMD_RDATA );
+	SpiReadWriteData( spi, ADS1247_CMD_RDATA );
 
 	for(i=0; i<3; i++)
 	{
-		Data[i] = ADS1247_ReadWriteData(ADS1247_CMD_NOP);
+		Data[i] = SpiReadWriteData( spi, ADS1247_CMD_NOP);
 	}
 
-	spiSetCs(spiREG1, 0);
+	SpiSetCs( spi, 0);
 
 	return (Data[0]<<16 | Data[1]<<8 | Data[2]);
 }
+
+/******************************************************************************
+  Function:
+  	  AdcInit
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void AdcInit( void )
+{
+	Ads1247Init( spiREG1 );
+	Ads1247Init( spiREG3 );
+}
+
+/******************************************************************************
+  Function:
+  	  AdcInit
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+spiBASE_t *AdcChannelSet( uint8 Ch )
+{
+	spiBASE_t *spi;
+
+	if ( Ch < 8 )
+	{
+		spi = spiREG1;
+		LV138CH1_EN_0;
+		LV138CH2_EN_1;
+		switch ( Ch )
+		{
+			case 0: LV138CH1_A0_0; LV138CH1_A1_0; LV138CH1_A2_0; break;
+			case 1: LV138CH1_A0_1; LV138CH1_A1_0; LV138CH1_A2_0; break;
+			case 2: LV138CH1_A0_0; LV138CH1_A1_1; LV138CH1_A2_0; break;
+			case 3: LV138CH1_A0_1; LV138CH1_A1_1; LV138CH1_A2_0; break;
+			case 4: LV138CH1_A0_0; LV138CH1_A1_0; LV138CH1_A2_1; break;
+			case 5: LV138CH1_A0_1; LV138CH1_A1_0; LV138CH1_A2_1; break;
+			case 6: LV138CH1_A0_0; LV138CH1_A1_1; LV138CH1_A2_1; break;
+			case 7: LV138CH1_A0_1; LV138CH1_A1_1; LV138CH1_A2_1; break;
+			default : break;
+		}
+	}
+	else
+	{
+		spi = spiREG3;
+		LV138CH1_EN_1;
+		LV138CH2_EN_0;
+		switch ( Ch - 8 )
+		{
+			case 0: LV138CH2_A0_0; LV138CH2_A1_0; LV138CH2_A2_0; break;
+			case 1: LV138CH2_A0_1; LV138CH2_A1_0; LV138CH2_A2_0; break;
+			case 2: LV138CH2_A0_0; LV138CH2_A1_1; LV138CH2_A2_0; break;
+			case 3: LV138CH2_A0_1; LV138CH2_A1_1; LV138CH2_A2_0; break;
+			case 4: LV138CH2_A0_0; LV138CH2_A1_0; LV138CH2_A2_1; break;
+			case 5: LV138CH2_A0_1; LV138CH2_A1_0; LV138CH2_A2_1; break;
+			case 6: LV138CH2_A0_0; LV138CH2_A1_1; LV138CH2_A2_1; break;
+			case 7: LV138CH2_A0_1; LV138CH2_A1_1; LV138CH2_A2_1; break;
+			default : break;
+		}
+	}
+
+	return spi;
+}
+
+/******************************************************************************
+  Function:SpiReadWriteData
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+uint32_t AdcReadData( uint8 Ch )
+{
+	uint8_t i,Data[3];
+	spiBASE_t *spi;
+
+	spi = AdcChannelSet( Ch );
+
+	SpiClearCs( spi, 0);
+
+	SpiReadWriteData( spi, ADS1247_CMD_RDATA );
+
+	for(i=0; i<3; i++)
+		Data[i] = SpiReadWriteData( spi, ADS1247_CMD_NOP);
+
+	SpiSetCs( spi, 0);
+
+	return (Data[0]<<16 | Data[1]<<8 | Data[2]);
+}
+
