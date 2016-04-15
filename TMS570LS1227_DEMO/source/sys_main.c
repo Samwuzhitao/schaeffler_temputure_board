@@ -163,7 +163,7 @@ void main(void)
 			ADS1247_Delay(20);
 		}
 		*/
-
+		/*
 		while(1)
 		{
 			int i;
@@ -173,11 +173,11 @@ void main(void)
 				printf("The ADS1247 Read Value is : %x \r\n",x);
 			}
 		}
-
+		*/
 
 		//printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
 
-		for (i = 0; i < DELAY_VALUE; i++);
+		//for (i = 0; i < DELAY_VALUE; i++);
 
 	}
 /* USER CODE END */

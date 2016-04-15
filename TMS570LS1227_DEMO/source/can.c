@@ -56,6 +56,9 @@
 #include "sys_vim.h"
 
 /* USER CODE BEGIN (1) */
+#include "CanProtocol.h"
+#include "stdio.h"
+
 /* USER CODE END */
 
 
@@ -67,6 +70,9 @@
 #endif
 
 /* USER CODE BEGIN (2) */
+CanMsg RxMessage;
+uint8 canGetIDType(canBASE_t *node, uint32 messageBox);
+uint8 canRxFlag = 0;
 /* USER CODE END */
 
 
@@ -1411,6 +1417,8 @@ void can3HighLevelInterrupt(void)
 	uint32 ES_value;
     
 /* USER CODE BEGIN (53) */
+	uint8 TmpIdType;
+	uint32 tmpid;
 /* USER CODE END */
 
     if (value == 0x8000U)
@@ -1449,6 +1457,44 @@ void can3HighLevelInterrupt(void)
         canMessageNotification(canREG3, value);
     }
 /* USER CODE BEGIN (54) */
+    /* 将  Massage box 接收到的东西存放在RxMessage中 */
+	//status = canIsRxMessageArrived(canREG3, 2 );
+	//if(status)
+	{
+	    tmpid = canGetID(canREG3, 2);
+
+		TmpIdType = canGetIDType(canREG3, 2);
+		printf("CAN_ID.pMessage->IDE: %x\r\n",TmpIdType );
+		//printf("Massage box%2d id = %8x canIsRxMessageArrived return status = %4d \r\n", 2, tmpid, status);
+		if(TmpIdType == CAN_ID_STD)
+		{
+	        printf("CAN_ID.pMessage->StdID: %x\r\n",tmpid >> 18 );
+			RxMessage.StdId = tmpid;
+		}
+		else
+		{
+		    printf("CAN_ID.pMessage->ExtID: %x\r\n",tmpid );
+			RxMessage.ExtId = tmpid;
+		}
+		RxMessage.IDE = TmpIdType;
+
+		canGetData( canREG3, 2, RxMessage.Data);
+
+		CAN_MessageGet(&RxMessage);
+	}
+
+	if(canRxFlag)
+	{
+		canIoSetPort(canREG1, 0, 0);
+		canIoSetPort(canREG2, 0, 0);
+		canRxFlag = 0;
+	}
+	else
+	{
+		canIoSetPort(canREG1, 1, 1);
+		canIoSetPort(canREG2, 1, 1);
+		canRxFlag = 1;
+	}
 /* USER CODE END */
 
 }

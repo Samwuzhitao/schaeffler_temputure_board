@@ -318,7 +318,8 @@ spiBASE_t *AdcChannelSet( uint8 Ch )
 }
 
 /******************************************************************************
-  Function:SpiReadWriteData
+  Function:
+  	  AdcReadData
   Description:
   Input:None
   Output:
