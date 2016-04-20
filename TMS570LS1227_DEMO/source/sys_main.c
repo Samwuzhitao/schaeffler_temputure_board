@@ -82,11 +82,11 @@ uint8 can_receive_buffer_data[CAN_DATA_BUFFER_LEN*8];
 /* USER CODE BEGIN (2) */
 /* USER CODE END */
 
-void main(void)
-{
+void main(void){
 /* USER CODE BEGIN (3) */
     volatile unsigned long int i,j;
-//    uint32 status,tmpid,tmpIdType;
+
+//  uint32 status,tmpid,tmpIdType;
 //	CAN_EXTSTDIDTypedef CanId;
 
     gioInit();
@@ -116,16 +116,11 @@ void main(void)
 */
 	//spiEnableLoopback(spiREG1, Analog_Lbk);
 	//spiEnableLoopback(spiREG3, Analog_Lbk);
-	AdcInit();
 
+	AdcInit();
 
 	while(1)
 	{
-		uint32 x;
-		uint16 data,ReadData;
-
-		data = 0x55;
-
 		Can_Process();
 
 		/* Initiate SPI2 Transmit and Receive through Interrupt Mode */

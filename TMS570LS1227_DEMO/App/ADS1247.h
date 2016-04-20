@@ -13,7 +13,16 @@
 #include "gio.h"
 #include "het.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
  /* Private typedef -----------------------------------------------------------*/
+typedef struct
+{
+	uint16 k;
+	uint16 b;
+} AdcCalibrationTypedef;
 
 /* Private macro -------------------------------------------------------------*/
 #define LV138CH1_EN_1  hetREG1->DOUT  |= (uint32)((uint32)1U << 20U)   /* PIN141 */
@@ -73,8 +82,21 @@
 #define ADS1247_CMD_SYSGCAL              0x61 ///< System gain calibration
 #define ADS1247_CMD_SYSFOCAL             0x61 ///< Self offset calibration
 
+/* Reg  */
+#define MUX0_SN_AIN0                     (uint8)((uint8)(0x00 << 0))
+#define MUX0_SN_AIN1                     (uint8)((uint8)(0x01 << 0))
+#define MUX0_SN_AIN2                     (uint8)((uint8)(0x02 << 0))
+#define MUX0_SN_AIN3                     (uint8)((uint8)(0x03 << 0))
 
+#define MUX0_SP_AIN0                     (uint8)((uint8)(0x00 << 3))
+#define MUX0_SP_AIN1                     (uint8)((uint8)(0x01 << 3))
+#define MUX0_SP_AIN2                     (uint8)((uint8)(0x02 << 3))
+#define MUX0_SP_AIN3                     (uint8)((uint8)(0x03 << 3))
 
+#define MUX0_BCS_OFF                     (uint8)((uint8)(0x00 << 6))
+#define MUX0_BCS_0_5UA                   (uint8)((uint8)(0x01 << 6))
+#define MUX0_BCS_2_0UA                   (uint8)((uint8)(0x02 << 6))
+#define MUX0_BCS_10_0UA                  (uint8)((uint8)(0x03 << 6))
 
 
 /* Private variables ---------------------------------------------------------*/
@@ -89,11 +111,17 @@ void Ads1247WriteRegister( spiBASE_t *spi, uint8_t addr, int8_t data );
 void Ads1247ReadRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] );
 void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] );
 
-void Ads1247Init( spiBASE_t *spi );
+uint16 Ads1247Init( spiBASE_t *spi );
 uint32_t Ads1247ReadData( spiBASE_t *spi );
 
-void AdcInit( void );
+uint16 AdcInit( void );
 spiBASE_t *AdcChannelSet( uint8 Ch );
 uint32_t AdcReadData( uint8 Ch );
+uint32_t AdcFilterReadData( uint8 Ch );
+uint32_t ResistanceToTemperature( float Resistance , uint8 Ch);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TMS570LS1227_DEMO_APP_ADS1247_H_ */

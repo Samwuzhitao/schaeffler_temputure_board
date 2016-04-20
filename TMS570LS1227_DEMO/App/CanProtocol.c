@@ -9,6 +9,7 @@
 #include "sys_common.h"
 #include "can.h"
 #include "CanProtocol.h"
+#include "ADS1247.h"
 
 #define CANRINGBUFFERLEN                   10
 
@@ -136,22 +137,27 @@ static uint32 CAN_Transmit(canBASE_t *node, uint32 messageBox, CanMsg *pMessage 
 	CAN_EXTSTDIDTypedef CanId;
 	uint32 status;
 
+	/* Set ID step
+	 * [1] set id
+	 * [2] set id type
+	 * */
+	/* get can id*/
 	if(pMessage->IDE == CAN_ID_STD)
-	{
 		CanId.Id = pMessage->StdId;
-		cansetIDType(canREG3, 1, CAN_ID_STD);
-	}
 	else
-	{
 		CanId.Id = pMessage->ExtId;
-		cansetIDType(canREG3, 1, CAN_ID_EXT);
-	}
-
+	/* set id */
 	canSetID(canREG3, 1, CanId.Id);
+
+	/* set can id type */
+	if(pMessage->IDE == CAN_ID_STD)
+		cansetIDType(canREG3, 1, CAN_ID_STD);
+	else
+		cansetIDType(canREG3, 1, CAN_ID_EXT);
 
 	status = canTransmit( node, messageBox, pMessage->Data );
 
-	//printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, tmpid, tmpIdType, status);
+	printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, CanId.Id, pMessage->IDE, status);
 
 	return status;
 
@@ -189,9 +195,9 @@ void CAN_MessageGet( CanMsg *pMessage )
 		cmd = CanId.CanExtId.FunCode;
 	}
 
-	printf("CanId.id.FunCode: %x\r\n",(cmd) & 0x1f);
-	printf("CanId.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
-	printf("CanId.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
+	//printf("CanId.id.FunCode: %x\r\n",(cmd) & 0x1f);
+	//printf("CanId.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
+	//printf("CanId.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
 
 	if( CanDstAddr.IDAddr == CanSetSrcAddr  )
 	{
@@ -317,35 +323,31 @@ void Can_Process( void )
   Return:
   Others:None
 ******************************************************************************/
-void Can_cmd_parse( void )
+uint32 Can_cmd_parse( void )
 {
-	//uint8_t CanCmdReturnFlg = 0;
-
-	//if((CanRxCmdRingBuffer[CanRxCmdButtomCounter].CanCmd & 0x10) == 0x10)
-		//CanCmdReturnFlg = 1;
+	uint32 status;
+	CanMsg CanReturnMessage;
 
 	switch(CanRxCmdRingBuffer[CanRxCmdButtomCounter].CanCmd & 0x0f)
 	{
 		case CAN_CMD_READ_AD:
-			//Can_return_ad_msg();
+			Can_return_ad_msg(&CanReturnMessage);
 			break;
-
 		case CAN_CMD_CHECK_BOARD:
 			//Can_return_board_msg();
 			break;
-
 		case CAN_CMD_RW_EEPROM:
 			//Can_return_eeprom_msg();
 			break;
-
 		case CAN_CMD_READ_SN_ID:
-			Can_return_sn_msg();
-		break;
-
-
+			Can_return_sn_msg(&CanReturnMessage);
+			break;
 		default:
 			break;
 	}
+
+	status = CAN_Transmit(canREG3, 1, &CanReturnMessage);
+	return status;
 }
 
 /******************************************************************************
@@ -356,25 +358,64 @@ void Can_cmd_parse( void )
   Return:
   Others:None
 ******************************************************************************/
-uint32 Can_return_sn_msg( void )
+void Can_return_sn_msg( CanMsg *CanToCanTxMessage )
 {
-	CanMsg CanToCanTxMessage;
-	uint32 status;
-
-	Can_change_return_id( &CanToCanTxMessage, CAN_CMD_READ_SN_ID );
+	Can_change_return_id( CanToCanTxMessage, CAN_CMD_READ_SN_ID );
 
 #ifdef USE_CAN_TEST
-	CanToCanTxMessage.Data[0] = 0x11;
-	CanToCanTxMessage.Data[1] = 0x22;
-	CanToCanTxMessage.Data[2] = 0x33;
-	CanToCanTxMessage.Data[3] = 0x44;
-	CanToCanTxMessage.Data[4] = 0x55;
-	CanToCanTxMessage.Data[5] = 0x66;
-	CanToCanTxMessage.Data[6] = 0x77;
-	CanToCanTxMessage.Data[7] = 0x88;
+	CanToCanTxMessage->Data[0] = 0x11;
+	CanToCanTxMessage->Data[1] = 0x22;
+	CanToCanTxMessage->Data[2] = 0x33;
+	CanToCanTxMessage->Data[3] = 0x44;
+	CanToCanTxMessage->Data[4] = 0x55;
+	CanToCanTxMessage->Data[5] = 0x66;
+	CanToCanTxMessage->Data[6] = 0x77;
+	CanToCanTxMessage->Data[7] = 0x88;
 #endif
 
-	status = CAN_Transmit(canREG3, 1, &CanToCanTxMessage);
+}
 
-	return status;
+
+/******************************************************************************
+  Function:Can_read_ad_msg
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
+{
+	uint32_t AdcValue = 0;
+	uint32 Temperature = 0;
+	float  AdcToPT1000Value = 0;
+	uint8 Ch;
+
+	Can_change_return_id( CanToCanTxMessage, CAN_CMD_READ_AD );
+
+#ifdef USE_CAN_NORMAL
+	AdcValue = Adc_get_value(CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[0]);
+#endif
+
+#ifdef USE_CAN_TEST
+	//AdcValue = 0x123456;
+	Ch = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[0];
+
+	//AdcValue = AdcReadData( Ch );
+	AdcValue = AdcFilterReadData( Ch );
+
+	AdcToPT1000Value = (float)AdcValue * 1640/0x7FFFFF ;
+
+	Temperature = ResistanceToTemperature( AdcToPT1000Value, Ch );;
+
+#endif
+
+	CanToCanTxMessage->Data[0] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[0];
+	CanToCanTxMessage->Data[1] = *((uint8_t *)(&AdcValue)+3);
+	CanToCanTxMessage->Data[2] = *((uint8_t *)(&AdcValue)+2);
+	CanToCanTxMessage->Data[3] = *((uint8_t *)(&AdcValue)+1);
+	CanToCanTxMessage->Data[4] = *((uint8_t *)(&Temperature)+3);
+	CanToCanTxMessage->Data[5] = *((uint8_t *)(&Temperature)+2);
+	CanToCanTxMessage->Data[6] = *((uint8_t *)(&Temperature)+1);
+	CanToCanTxMessage->Data[7] = *((uint8_t *)(&Temperature)+0);
 }

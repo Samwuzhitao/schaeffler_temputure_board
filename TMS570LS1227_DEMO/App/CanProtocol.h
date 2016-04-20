@@ -103,9 +103,10 @@ void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal);
 //void cansetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal);
 
 void CAN_MessageGet( CanMsg *pMessage );
-void Can_cmd_parse( void );
+uint32 Can_cmd_parse( void );
 void Can_Process( void );
 void Can_change_return_id( CanMsg *pMessage, uint8_t cmd );
-uint32 Can_return_sn_msg( void );
 
+void Can_return_sn_msg( CanMsg *CanToCanTxMessage );
+void Can_return_ad_msg( CanMsg *CanToCanTxMessage );
 #endif /* CANPROTOCOL_H_ */
