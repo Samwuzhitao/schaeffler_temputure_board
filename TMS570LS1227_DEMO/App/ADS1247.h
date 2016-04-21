@@ -119,6 +119,8 @@ spiBASE_t *AdcChannelSet( uint8 Ch );
 uint32_t AdcReadData( uint8 Ch );
 uint32_t AdcFilterReadData( uint8 Ch );
 uint32_t ResistanceToTemperature( float Resistance , uint8 Ch);
+void SetTempCalibrationParameter(uint8 Ch , AdcCalibrationTypedef AdcCal);
+AdcCalibrationTypedef GetTempCalibrationParameter( uint8 Ch );
 
 #ifdef __cplusplus
 }

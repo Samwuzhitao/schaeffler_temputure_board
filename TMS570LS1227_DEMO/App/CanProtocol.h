@@ -14,10 +14,12 @@
 #define CAN_SRC_ADDR                1     /* This Board addr         */
 
 /* Can commond code */
-#define CAN_CMD_READ_AD             0     /* Read adc value cmd code */
-#define CAN_CMD_RW_EEPROM           1     /* Read and write cmd code */
-#define CAN_CMD_CHECK_BOARD         2     /* check themself cmd code */
-#define CAN_CMD_READ_SN_ID          3     /* Read SN id cmd code     */
+#define CAN_CMD_READ_AD             1     /* Read adc value cmd code */
+#define CAN_CMD_RW_EEPROM           2     /* Read and write cmd code */
+#define CAN_CMD_CHECK_BOARD         3     /* check themself cmd code */
+#define CAN_CMD_RW_SN_ID            4     /* Read SN id cmd code     */
+#define CAN_CMD_CALIBRATION_TEMP    5     /* Calculate and set calibration temperature parameter */
+
 
 /* Can ID type */
 #define CAN_ID_STD                  0     /* Std ID type             */
@@ -95,6 +97,15 @@ typedef struct
 	uint8_t data[8];
 } CAN_MessageTypedef;
 
+typedef enum
+{
+	NoErr = 0,
+	ReadAdcErr,
+	ReadEepromErr,
+	WriteEepromErr,
+	CanTransmitErr
+} ErrTypedef;
+
 /* Private function prototypes -----------------------------------------------*/
 uint8 canGetIDType(canBASE_t *node, uint32 messageBox);
 void cansetIDType(canBASE_t *node, uint32 messageBox, uint8 IdType);
@@ -105,8 +116,12 @@ void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal);
 void CAN_MessageGet( CanMsg *pMessage );
 uint32 Can_cmd_parse( void );
 void Can_Process( void );
-void Can_change_return_id( CanMsg *pMessage, uint8_t cmd );
+void Can_change_return_id( CanMsg *pMessage, uint8_t cmd , ErrTypedef ErrFlg );
 
 void Can_return_sn_msg( CanMsg *CanToCanTxMessage );
 void Can_return_ad_msg( CanMsg *CanToCanTxMessage );
+void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage );
+void Can_return_board_msg( CanMsg *CanToCanTxMessage );
+void Can_return_Calibration_temp_msg( CanMsg *CanToCanTxMessage );
+
 #endif /* CANPROTOCOL_H_ */

@@ -12,7 +12,7 @@
 #define ADS1247_ALLOW_FAILURE_NUMBER                10
 #define ADS1247_PT1000_RRESISTANCE_VALUE            840
 
-const AdcCalibrationTypedef Ads1247PositiveCalibration[16] =
+AdcCalibrationTypedef Ads1247PositiveCalibration[16] =
 {
 	{1663 , 3477},   // Ads1247 channel 0 Calibration parameter
 	{1663 , 3477},   // Ads1247 channel 1 Calibration parameter
@@ -32,7 +32,7 @@ const AdcCalibrationTypedef Ads1247PositiveCalibration[16] =
 	{1663 , 3477},   // Ads1247 channel 15 Calibration parameter
 };
 
-const AdcCalibrationTypedef Ads1247NegativeCalibration[16] =
+AdcCalibrationTypedef Ads1247NegativeCalibration[16] =
 {
 	{1 , 0},   // Ads1247 channel 0 Calibration parameter
 	{1 , 0},   // Ads1247 channel 1 Calibration parameter
@@ -247,33 +247,40 @@ uint16 Ads1247Init( spiBASE_t *spi )
 	// Positive = IN1 Negitive = IN2
 	WriteRegister =  MUX0_BCS_OFF | MUX0_SP_AIN1 | MUX0_SN_AIN2;
 	Ads1247WriteRegister( spi, ADS1247_REG_MUX0, WriteRegister );
+	//printf("ADS1247_REG_MUX0 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_MUX0 );
+	//printf("ADS1247_REG_MUX0 Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_MUX0;
 
 	// not Enable Bias voltage
 	WriteRegister = 0x00;
 	Ads1247WriteRegister( spi, ADS1247_REG_VBIAS, WriteRegister );
+	//printf("ADS1247_REG_VBIAS write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_VBIAS );
-
+	//printf("ADS1247_REG_VBIAS Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_VBIAS;
 
 	// Set Internal OSC, (IDAC)Internal reference, (ADC)OnBoard reference
 	WriteRegister = 0x30;
 	Ads1247WriteRegister( spi, ADS1247_REG_MUX1, WriteRegister );
+	//printf("ADS1247_REG_MUX1 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_MUX1 );
+	//printf("ADS1247_REG_MUX1 Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_MUX1;
 
 	// Set PGA = 1   DOR = 320SPS
 	WriteRegister = 0x06;
 	Ads1247WriteRegister( spi, ADS1247_REG_SYS0, WriteRegister );
+	//printf("ADS1247_REG_SYS0 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_SYS0 );
+	//printf("ADS1247_REG_SYS0 Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_SYS0;
 
@@ -281,9 +288,11 @@ uint16 Ads1247Init( spiBASE_t *spi )
     // I = 1mA
 	WriteRegister = 0x06;
 	Ads1247WriteRegister( spi, ADS1247_REG_IDAC0, WriteRegister );
+	//printf("ADS1247_REG_IDAC0 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	// ADS1247_REG_IDAC0:bit4-bit7 read only
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_IDAC0 ) & 0x0F;
+	//printf("ADS1247_REG_IDAC0 Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_IDAC0;
 
@@ -291,8 +300,10 @@ uint16 Ads1247Init( spiBASE_t *spi )
 	// Connected the AIN0 and AIN3 pin for the  source DAC
 	WriteRegister = 0x30;
 	Ads1247WriteRegister( spi, ADS1247_REG_IDAC1, WriteRegister );
+	//printf("ADS1247_REG_IDAC1 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
 	ReadRegister = Ads1247ReadRegister( spi, ADS1247_REG_IDAC1 );
+	//printf("ADS1247_REG_IDAC1 Read Register = %d", ReadRegister);
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_IDAC1;
 
@@ -336,8 +347,9 @@ uint32_t Ads1247ReadData( spiBASE_t *spi )
 ******************************************************************************/
 uint16 AdcInit( void )
 {
-	uint16 Err = 0;
+	uint16 Err = 1;
 	uint8 times = 0;
+
 	//Err = Ads1247Init( spiREG1 );
 
 	while( Err )
@@ -349,10 +361,10 @@ uint16 AdcInit( void )
 		if( times > ADS1247_ALLOW_FAILURE_NUMBER)
 		{
 			printf("ADS1247 initialize fail, please check you board! and reset your board. \r\n");
-			while(1);
+			return Err;
 		}
 	}
-
+	printf("ADS1247 initialize OK! \r\n");
 	return Err;
 }
 
@@ -515,4 +527,36 @@ uint32_t ResistanceToTemperature( float Resistance , uint8 Ch)
 	Temperature = (uint32)(PT1000Resistance - 1000)*1000/3.91;
 
 	return Temperature;
+}
+
+/******************************************************************************
+  Function:
+  	  SetTempCalibrationParameter
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void SetTempCalibrationParameter(uint8 Ch , AdcCalibrationTypedef AdcCal)
+{
+	Ads1247PositiveCalibration[Ch] = AdcCal;
+}
+
+/******************************************************************************
+  Function:
+  	  SetTempCalibrationParameter
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+AdcCalibrationTypedef GetTempCalibrationParameter( uint8 Ch )
+{
+	AdcCalibrationTypedef AdcCal;
+
+	AdcCal = Ads1247PositiveCalibration[Ch];
+
+	return AdcCal;
 }
