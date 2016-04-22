@@ -56,11 +56,13 @@ spiDAT1_t dataconfig1_t;
 
 /******************************************************************************
   Function:
-  	  SpiSetCs
+  	    SpiSetCs
   Description:
-  Input:None
-  Output:
-  Return:
+    	Set spi cs high
+  Input:
+  	    spi  : Spi port
+  	    nCs : Used nCs in spi
+  Output:None
   Others:None
 ******************************************************************************/
 void SpiSetCs( spiBASE_t *spi, uint8 nCs )
@@ -70,11 +72,13 @@ void SpiSetCs( spiBASE_t *spi, uint8 nCs )
 
 /******************************************************************************
   Function:
-  	  SpiClearCs
+		SpiClearCs
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Set spi cs low
+  Input:
+		spi  : Spi port
+  	    nCs : Used nCs in spi
+  Output:None
   Others:None
 ******************************************************************************/
 void SpiClearCs( spiBASE_t *spi, uint8 nCs )
@@ -84,11 +88,14 @@ void SpiClearCs( spiBASE_t *spi, uint8 nCs )
 
 /******************************************************************************
   Function:
-  	  SpiReadWriteData
+		SpiReadWriteData
   Description:
-  Input:None
+  	  	Spi read and write data function.
+  Input:
+		spi  : Spi port
+		data : Data sent via spi
   Output:
-  Return:
+  	  	ReadData : Data read via spi
   Others:None
 ******************************************************************************/
 uint8_t SpiReadWriteData( spiBASE_t *spi, uint8_t data )
@@ -104,11 +111,12 @@ uint8_t SpiReadWriteData( spiBASE_t *spi, uint8_t data )
 
 /******************************************************************************
   Function:
-  	  SpiDelay
+		SpiDelay
   Description:
-  Input:None
-  Output:
-  Return:
+		delay function
+  Input:
+		nCount: the number of milliseconds
+  Output:None
   Others:None
 ******************************************************************************/
 void Ads1247Delay( uint32 nCount )
@@ -122,10 +130,11 @@ void Ads1247Delay( uint32 nCount )
   	  Ads1247ReadRegisters
   Description:
   Input:
+  	  	spi  : Spi port
 		addr : Start register adddress (0 to 15)
 		num  : number of registers to be read (number of bytes - 1)
-  Output:
-  Return:
+		data : Data sent via spi
+  Output:None
   Others:None
 ******************************************************************************/
 void Ads1247ReadRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] )
@@ -151,10 +160,10 @@ void Ads1247ReadRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t da
   	  spiReadRegister
   Description:
   Input:
+  	  	spi  : Spi port
 		addr : Start register adddress (0 to 15)
-		num  : number of registers to be read (number of bytes - 1)
-  Output:
-  Return:
+		data : Data read via spi
+  Output:None
   Others:None
 ******************************************************************************/
 uint8_t Ads1247ReadRegister( spiBASE_t *spi, uint8_t addr )
@@ -178,10 +187,11 @@ uint8_t Ads1247ReadRegister( spiBASE_t *spi, uint8_t addr )
   Function:Ads1247ReadRegister
   Description:
   Input:
+  	  	spi  : Spi port
 		addr : Start register adddress (0 to 15)
-		num  : number of registers to be read (number of bytes - 1)
-  Output:
-  Return:
+		num  : number of registers to be write (number of bytes - 1)
+		data : Data sent via spi
+  Output:None
   Others:None
 ******************************************************************************/
 void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t data[] )
@@ -206,8 +216,9 @@ void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t d
   Function:Ads1247ReadRegister
   Description:
   Input:
+  	  	spi  : Spi port
 		addr : Start register adddress (0 to 15)
-		data : data
+		data : Data sent via spi
   Output:
   Return:
   Others:None
@@ -226,11 +237,14 @@ void Ads1247WriteRegister( spiBASE_t *spi, uint8_t addr, int8_t data )
 }
 
 /******************************************************************************
-  Function:SpiReadWriteData
+  Function:
+		Ads1247Init
   Description:
-  Input:None
+  	    Ads1247 initialize function
+  Input:
+		spi : Spi port
   Output:
-  Return:
+  	    Err : initialize register result of error
   Others:None
 ******************************************************************************/
 uint16 Ads1247Init( spiBASE_t *spi )
@@ -311,16 +325,20 @@ uint16 Ads1247Init( spiBASE_t *spi )
 }
 
 /******************************************************************************
-  Function:SpiReadWriteData
+  Function:
+  	    Ads1247ReadData
   Description:
-  Input:None
+        Read the Ad value
+  Input:
+		spi : Spi port
   Output:
-  Return:
+  	    AdcData : Current Ad value
   Others:None
 ******************************************************************************/
 uint32_t Ads1247ReadData( spiBASE_t *spi )
 {
 	uint8_t i,Data[3];
+	uint32 AdcData = 0;
 
 	SpiClearCs( spi, 0);
 
@@ -333,16 +351,19 @@ uint32_t Ads1247ReadData( spiBASE_t *spi )
 
 	SpiSetCs( spi, 0);
 
-	return (Data[0]<<16 | Data[1]<<8 | Data[2]);
+	AdcData = Data[0]<<16 | Data[1]<<8 | Data[2];
+
+	return AdcData;
 }
 
 /******************************************************************************
   Function:
-  	  AdcInit
+  	    AdcInit
   Description:
+  	    Initialize 2 ADS1247
   Input:None
   Output:
-  Return:
+  	    Err: the error code for initialize.
   Others:None
 ******************************************************************************/
 uint16 AdcInit( void )
@@ -364,17 +385,19 @@ uint16 AdcInit( void )
 			return Err;
 		}
 	}
-	printf("ADS1247 initialize OK! \r\n");
+
 	return Err;
 }
 
 /******************************************************************************
   Function:
-  	  AdcInit
+		AdcChannelSet
   Description:
-  Input:None
+  	    Set sampling channel and get the operational spi port
+  Input:
+		Ch : Sampling channel
   Output:
-  Return:
+		spi : This channel corresponding to spi port
   Others:None
 ******************************************************************************/
 spiBASE_t *AdcChannelSet( uint8 Ch )
@@ -423,11 +446,13 @@ spiBASE_t *AdcChannelSet( uint8 Ch )
 
 /******************************************************************************
   Function:
-  	  AdcReadData
+		AdcReadData
   Description:
-  Input:None
+  	    Read ad value of certain channel
+  Input:
+		Ch : Sampling channel
   Output:
-  Return:
+  	    AdcValue : Current Ad value of certain channel
   Others:None
 ******************************************************************************/
 uint32_t AdcReadData( uint8 Ch )
@@ -454,11 +479,13 @@ uint32_t AdcReadData( uint8 Ch )
 
 /******************************************************************************
   Function:
-  	  AdcFilterReadData
+		AdcFilterReadData
   Description:
-  Input:None
+  	    Read a certain channel adc values and filtering
+  Input:
+		Ch : Sampling channel
   Output:
-  Return:
+  	    AdcValue : Current Ad value of certain channel
   Others:None
 ******************************************************************************/
 uint32_t AdcFilterReadData( uint8 Ch )
@@ -512,9 +539,12 @@ uint32_t AdcFilterReadData( uint8 Ch )
   Function:
   	  ResistanceToTemperature
   Description:
-  Input:None
+  	  The resistance value is converted into temperature
+  Input:
+	  Resistance:The resistance value
+	  Ch : Sampling channel
   Output:
-  Return:
+	Temperature:temperature * 1000
   Others:None
 ******************************************************************************/
 uint32_t ResistanceToTemperature( float Resistance , uint8 Ch)
@@ -531,11 +561,13 @@ uint32_t ResistanceToTemperature( float Resistance , uint8 Ch)
 
 /******************************************************************************
   Function:
-  	  SetTempCalibrationParameter
+		SetTempCalibrationParameter
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Set temperature calibration parameter
+  Input:
+	    Ch : Sampling channel
+	    AdcCal :The temperature calibration parameter need to be set
+  Output:None
   Others:None
 ******************************************************************************/
 void SetTempCalibrationParameter(uint8 Ch , AdcCalibrationTypedef AdcCal)
@@ -545,11 +577,13 @@ void SetTempCalibrationParameter(uint8 Ch , AdcCalibrationTypedef AdcCal)
 
 /******************************************************************************
   Function:
-  	  SetTempCalibrationParameter
+		GetTempCalibrationParameter
   Description:
-  Input:None
+  	    Get certain channel temperature calibration parameter
+  Input:
+	    Ch : Sampling channel
   Output:
-  Return:
+  	    AdcCal :The temperature calibration parameter need to be set
   Others:None
 ******************************************************************************/
 AdcCalibrationTypedef GetTempCalibrationParameter( uint8 Ch )

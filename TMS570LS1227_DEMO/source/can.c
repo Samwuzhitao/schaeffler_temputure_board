@@ -58,7 +58,7 @@
 /* USER CODE BEGIN (1) */
 #include "CanProtocol.h"
 #include "stdio.h"
-
+#include "LED.h"
 /* USER CODE END */
 
 
@@ -1485,14 +1485,18 @@ void can3HighLevelInterrupt(void)
 
 	if(canRxFlag)
 	{
-		canIoSetPort(canREG1, 0, 0);
-		canIoSetPort(canREG2, 0, 0);
+		LEDOn(LED4);
+		LEDOn(LED5);
+		LEDOn(LED6);
+		LEDOn(LED7);
 		canRxFlag = 0;
 	}
 	else
 	{
-		canIoSetPort(canREG1, 1, 1);
-		canIoSetPort(canREG2, 1, 1);
+		LEDOff(LED4);
+		LEDOff(LED5);
+		LEDOff(LED6);
+		LEDOff(LED7);
 		canRxFlag = 1;
 	}
 /* USER CODE END */

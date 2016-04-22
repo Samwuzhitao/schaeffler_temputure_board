@@ -10,8 +10,10 @@
 #include "can.h"
 #include "CanProtocol.h"
 #include "ADS1247.h"
+#include "LED.h"
 
-#define CANRINGBUFFERLEN                   10
+
+
 uint8 SN_ID[7] = { 0x12,0x23,0x56,0x78,0xab,0xcd,0xef };
 
 /* Private variables ---------------------------------------------------------*/
@@ -23,7 +25,18 @@ uint8 CanReceivecompleteFlg = 0;
 
 CAN_MessageTypedef CanRxCmdRingBuffer[CANRINGBUFFERLEN];
 
-
+/******************************************************************************
+  Function:
+		cansetIDType
+  Description:
+  	    Set certain messagebox Id type
+  Input:
+	    node : Can port
+	    messageBox : Used message box
+	    IdType : The type of ID
+  Output:None
+  Others:None
+******************************************************************************/
 void cansetIDType(canBASE_t *node, uint32 messageBox, uint8 IdType)
 {
     /** - Wait until IF2 is ready for use */
@@ -59,6 +72,18 @@ void cansetIDType(canBASE_t *node, uint32 messageBox, uint8 IdType)
     } /* Wait */
 }
 
+/******************************************************************************
+  Function:
+		canGetIDType
+  Description:
+  	    Get certain messagebox Id type
+  Input:
+	    node : Can port
+	    messageBox : Used messagebox
+  Output:
+  	    IdType : The type of ID
+  Others:None
+******************************************************************************/
 uint8 canGetIDType(canBASE_t *node, uint32 messageBox)
 {
     uint32 IdType;
@@ -91,6 +116,18 @@ uint8 canGetIDType(canBASE_t *node, uint32 messageBox)
     	return CAN_ID_STD;
 }
 
+/******************************************************************************
+  Function:
+		canSetID
+  Description:
+  	    Set certain messagebox Id type
+  Input:
+	    node : Can port
+	    messageBox : Used message box
+	    msgBoxArbitVal : The ID
+  Output:None
+  Others:None
+******************************************************************************/
 void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal)
 {
 
@@ -120,15 +157,17 @@ void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal)
     } /* Wait */
 
 }
+
 /******************************************************************************
-  Function: CAN_Transmit
+  Function:
+		CAN_Transmit
   Description:
-  Input :
-  	  node       :node Pointer to CAN node
- 	  messageBox :messageBox Message box number of CAN node
- 	  pMessage   :Can need to transmit message
-  Output:
-  Return: The function will return:
+  	    Sent data via certain messagebox
+  Input:
+	    node : Can port
+	    messageBox : Used message box
+	    msgBoxArbitVal : The ID
+  Output: The function will return:
            - 0: When the setup of the TX message box wasn't successful
            - 1: When the setup of the TX message box was successful
   Others:None
@@ -165,11 +204,13 @@ static uint32 CAN_Transmit(canBASE_t *node, uint32 messageBox, CanMsg *pMessage 
 }
 
 /******************************************************************************
-  Function:CAN_MessageGet
+  Function:
+		CAN_MessageGet
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Get the data from the current message
+  Input:
+	    pMessage: current message
+  Output:None
   Others:None
 ******************************************************************************/
 void CAN_MessageGet( CanMsg *pMessage )
@@ -224,11 +265,15 @@ void CAN_MessageGet( CanMsg *pMessage )
 }
 
 /******************************************************************************
-  Function:Can_to_can_change_id
+  Function:
+		Can_change_return_id
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Change return id
+  Input:
+	    pMessage: current message
+	    cmd: The current can command
+	    ErrFlg: The current error types
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_change_return_id( CanMsg *pMessage, uint8_t cmd , ErrTypedef ErrFlg )
@@ -290,23 +335,28 @@ void Can_change_return_id( CanMsg *pMessage, uint8_t cmd , ErrTypedef ErrFlg )
 
 
 /******************************************************************************
-  Function:Can_Process
+  Function:
+		Can_Process
   Description:
+  	    Can dealing message process
   Input:None
-  Output:
-  Return:
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_Process( void )
 {
+	uint8 Err = 0;
+
 	if(CanReceivecompleteFlg == 1)
 	{
 		if(CanRxCmdTopCounter != CanRxCmdButtomCounter)
 		{
 
-			Can_cmd_parse();
+			Err = Can_cmd_parse();
 
-			CanRxCmdButtomCounter++;
+			if( Err == 0 )
+				CanRxCmdButtomCounter++;
+
 
 			if(CanRxCmdButtomCounter == CANRINGBUFFERLEN)
 			{
@@ -323,11 +373,13 @@ void Can_Process( void )
 
 
 /******************************************************************************
-  Function:Can_cmd_parse
+  Function:
+		Can_cmd_parse
   Description:
+  	    Can Process
   Input:None
   Output:
-  Return:
+  	    status: The results of processing
   Others:None
 ******************************************************************************/
 uint32 Can_cmd_parse( void )
@@ -362,11 +414,12 @@ uint32 Can_cmd_parse( void )
 
 /******************************************************************************
   Function:
-  	  Can_return_sn_msg
+		Can_return_sn_msg
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Can Serial number operation function
+  Input:
+  	  	CanToCanTxMessage: return message
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_return_sn_msg( CanMsg *CanToCanTxMessage )
@@ -380,6 +433,7 @@ void Can_return_sn_msg( CanMsg *CanToCanTxMessage )
 #ifdef USE_CAN_TEST
 
 	CanToCanTxMessage->Data[0] = CmdFlg;
+
 	if( CmdFlg == 0x01 )
 	{
 		for(i=0;i<7;i++)
@@ -407,11 +461,12 @@ void Can_return_sn_msg( CanMsg *CanToCanTxMessage )
 
 /******************************************************************************
   Function:
-  	  Can_read_ad_msg
+		Can_return_ad_msg
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Can ad operation function
+  Input:
+  	  	CanToCanTxMessage: return message
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
@@ -456,11 +511,12 @@ void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
 
 /******************************************************************************
   Function:
-  	  Can_return_eeprom_msg
+		Can_return_eeprom_msg
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Can eeprom operation function
+  Input:
+  	  	CanToCanTxMessage: return message
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
@@ -540,11 +596,12 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 
 /******************************************************************************
   Function:
-  	  Can_return_board_msg
+		Can_return_board_msg
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Can noard check operation function
+  Input:
+  	  	CanToCanTxMessage: return message
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_return_board_msg( CanMsg *CanToCanTxMessage )
@@ -582,11 +639,12 @@ void Can_return_board_msg( CanMsg *CanToCanTxMessage )
 
 /******************************************************************************
   Function:
-  	  Can_return_Calibration_temp_msg
+		Can_return_Calibration_temp_msg
   Description:
-  Input:None
-  Output:
-  Return:
+  	    Can Calibration temperature parameter operation function
+  Input:
+  	  	CanToCanTxMessage: return message
+  Output:None
   Others:None
 ******************************************************************************/
 void Can_return_Calibration_temp_msg( CanMsg *CanToCanTxMessage )

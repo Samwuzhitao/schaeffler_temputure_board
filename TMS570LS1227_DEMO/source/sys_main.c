@@ -44,15 +44,16 @@
 
 /* USER CODE BEGIN (0) */
 #include "stdio.h"
-#include "sci.h"
 #include "sys_core.h"
-#include "can.h"
 #include "sys_vim.h"
-#include "CanProtocol.h"
+#include "sci.h"
 #include "spi.h"
-#include "ADS1247.h"
 #include "gio.h"
 #include "het.h"
+#include "can.h"
+#include "LED.h"
+#include "ADS1247.h"
+#include "CanProtocol.h"
 
 /* USER CODE END */
 
@@ -84,95 +85,23 @@ uint8 can_receive_buffer_data[CAN_DATA_BUFFER_LEN*8];
 
 void main(void){
 /* USER CODE BEGIN (3) */
-    volatile unsigned long int i,j;
-
-//  uint32 status,tmpid,tmpIdType;
-//	CAN_EXTSTDIDTypedef CanId;
 
     gioInit();
     hetInit();
 	sciInit();
 	canInit();
 	spiInit();
-	canEnableErrorNotification(canREG3);
-//	canEnableloopback(canREG3,Internal_Lbk);
-
 	cansetIDType(canREG3, 2, CAN_ID_STD);
-/*
-	CanId.CanStdId.FunCode = 0x07;
-	CanId.CanStdId.SrcAddr = 0x01;
-	CanId.CanStdId.DstAddr = 0x02;
-	canSetID(canREG3, 1, CanId.Id);
-	cansetIDType(canREG3, 1, CAN_ID_STD);
-*/
+
 	vimInit();
 	_enable_interrupt_();
-/*
-	for (j = 0; j<CAN_DATA_BUFFER_LEN; j++)
-	{
-		can_sent_buffer_data[j] =  j;
-		can_receive_buffer_data[j] = 0;
-	}
-*/
-	//spiEnableLoopback(spiREG1, Analog_Lbk);
-	//spiEnableLoopback(spiREG3, Analog_Lbk);
 
 	AdcInit();
+	LEDInit();
 
 	while(1)
 	{
 		Can_Process();
-
-		/* Initiate SPI2 Transmit and Receive through Interrupt Mode */
-		//spiTransmitData(spiREG1, &dataconfig1_t, 1, &TX_Data);
-
-		/* Initiate SPI1 Transmit and Receive through Polling Mode*/
-		//spiTransmitData(spiREG3, &dataconfig1_t, 1, &TX_Data);
-
-		/*
-		printf("Massage box%2d id = %8x idtype = %1d \r\n", 1, canGetID(canREG3, 1) , canGetIDType(canREG3, 1));
-		printf("Massage box%2d id = %8x idtype = %1d \r\n", 2, canGetID(canREG3, 2) , canGetIDType(canREG3, 2));
-		status = canTransmit(canREG3, 1, &(can_sent_buffer_data[0]));
-		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, tmpid>>18, tmpIdType, status);
-		*/
-		//spiTransmitAndReceiveData(spiREG1, &dataconfig1_t, 1, &data, &ReadData);
-		//spiTransmitAndReceiveData(spiREG3, &dataconfig1_t, 1, &data, &ReadData);
-		//printf("spiTransmitAndReceiveData Loopback Value is : %2x \r\n", ReadData);
-		//ReadData = ADS1247_ReadWriteData(data);
-		//ADS1247_WriteRegister(i,0x02);
-
-
-		//ADS1247_Init();
-		/*
-		for(i=0;i<0x0F;i++)
-		{
-			spiClearCs(spiREG3, 0);
-			ADS1247_ReadWriteData( ADS1247_CMD_RESET );
-			spiSetCs(spiREG3, 0);
-			ADS1247_Delay(60);
-
-			ADS1247_WriteRegister( ADS1247_REG_MUX0, 0x0A );
-			ADS1247_Delay(20);
-			x = ADS1247_ReadRegister(ADS1247_REG_MUX0);
-			printf("ADS1247_REG_MUX0 Register Value is : %2x \r\n", x);
-			ADS1247_Delay(20);
-		}
-		*/
-		/*
-		while(1)
-		{
-			int i;
-			for (i=0; i<16; i++)
-			{
-				AdcReadData(i);
-				printf("The ADS1247 Read Value is : %x \r\n",x);
-			}
-		}
-		*/
-
-		//printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
-
-		//for (i = 0; i < DELAY_VALUE; i++);
 
 	}
 /* USER CODE END */

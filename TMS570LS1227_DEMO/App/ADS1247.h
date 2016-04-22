@@ -82,7 +82,7 @@ typedef struct
 #define ADS1247_CMD_SYSGCAL              0x61 ///< System gain calibration
 #define ADS1247_CMD_SYSFOCAL             0x61 ///< Self offset calibration
 
-/* Reg  */
+/* Register MUX0 Configuration definition */
 #define MUX0_SN_AIN0                     (uint8)((uint8)(0x00 << 0))
 #define MUX0_SN_AIN1                     (uint8)((uint8)(0x01 << 0))
 #define MUX0_SN_AIN2                     (uint8)((uint8)(0x02 << 0))
@@ -98,6 +98,17 @@ typedef struct
 #define MUX0_BCS_2_0UA                   (uint8)((uint8)(0x02 << 6))
 #define MUX0_BCS_10_0UA                  (uint8)((uint8)(0x03 << 6))
 
+/* Register VBIAS Configuration definition */
+#define VBIAS_AIN0_ON                    (uint8)((uint8)(0x01 << 0))
+#define VBIAS_AIN1_ON                    (uint8)((uint8)(0x01 << 1))
+#define VBIAS_AIN2_ON                    (uint8)((uint8)(0x01 << 2))
+#define VBIAS_AIN3_ON                    (uint8)((uint8)(0x01 << 3))
+
+/* Register MUX1 Configuration definition */
+#define MUX1_VREFCON_INTERREF_OFF        (uint8)((uint8)(0x00 << 5))
+#define MUX1_VREFCON_INTERREF_ON         (uint8)((uint8)(0x01 << 5))
+#define MUX1_VREFCON_INTERREF_ON         (uint8)((uint8)(0x01 << 5))
+#define MUX1_EXTERN_CLK                  (uint8)((uint8)(0x01 << 7))
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/

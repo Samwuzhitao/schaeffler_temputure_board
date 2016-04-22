@@ -12,6 +12,7 @@
 //#define USE_CAN_NORMAL
 
 #define CAN_SRC_ADDR                1     /* This Board addr         */
+#define CANRINGBUFFERLEN            10
 
 /* Can commond code */
 #define CAN_CMD_READ_AD             1     /* Read adc value cmd code */
@@ -110,8 +111,6 @@ typedef enum
 uint8 canGetIDType(canBASE_t *node, uint32 messageBox);
 void cansetIDType(canBASE_t *node, uint32 messageBox, uint8 IdType);
 void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal);
-//uint32 canGetStdID(canBASE_t *node, uint32 messageBox);
-//void cansetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal);
 
 void CAN_MessageGet( CanMsg *pMessage );
 uint32 Can_cmd_parse( void );
