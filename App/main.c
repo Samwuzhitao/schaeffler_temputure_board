@@ -72,26 +72,10 @@ int main (void)
 	
   while(1)
 	{ 	
-		int i;
-		float x;
-		
 		Serial_Process();
 		
 		Can_Process();
 		
-		
-//		for(i=0;i<0x0F;i++)
-//		{
-////			ADS1247_WriteRegister(i,0x02);
-////			Delay(20);
-//			printf("The ADS1247 Read Address %2x Register Value is : %2x \r\n",i,ADS1247_ReadRegister(i));
-//			Delay(20);
-//		}
-		x = ADS1247_ReadData();
-		printf("The ADS1247 Read Value is : %x \r\n",x);
-		printf("The ADS1247 Read Value is : %f \r\n",( float )x*3300*5/0xffffff);
-		Delay(100); 
-		  
 	}
 } 
 

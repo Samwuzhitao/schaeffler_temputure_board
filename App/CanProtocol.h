@@ -51,11 +51,12 @@ typedef struct
 	uint8_t data[8];
 } CAN_MessageTypedef;
 
-/* CMD */
-#define CAN_CMD_READ_AD             0     /*     */
-#define CAN_CMD_RW_EEPROM           1     /*     */
-#define CAN_CMD_CHECK_BOARD         2     /*     */
-#define CAN_CMD_READ_SN_ID          3     /*     */
+/* Can commond code */
+#define CAN_CMD_READ_AD             1     /* Read adc value cmd code */
+#define CAN_CMD_RW_EEPROM           2     /* Read and write cmd code */
+#define CAN_CMD_CHECK_BOARD         3     /* check themself cmd code */
+#define CAN_CMD_RW_SN_ID            4     /* Read SN id cmd code     */
+#define CAN_CMD_CALIBRATION_TEMP    5     /* Calculate and set calibration temperature parameter */
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -76,4 +77,8 @@ void Can_return_eeprom_msg( void );
 
 void Can_show_board_msg( void );
 void Can_return_board_msg( void );
+
+void Can_show_Calibration_temp_msg( void );
+
+
 #endif
