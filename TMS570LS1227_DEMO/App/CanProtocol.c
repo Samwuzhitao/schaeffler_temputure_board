@@ -552,6 +552,7 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 #endif
 
 		DS2341_Write_8Byte( EepromCh, EepromStartAddr, EepromWritedata);
+		DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
 
 #ifdef USE_CAN_TEST
 		EepromBackState = 0;
@@ -566,13 +567,9 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 #endif
 
 #ifdef USE_CAN_TEST
+
 		EepromBackState = 0;
-		/*
-		Eepromdata[0] = 0x44;
-		Eepromdata[1] = 0x33;
-		Eepromdata[2] = 0x22;
-		Eepromdata[3] = 0x11;
-		*/
+
 		DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
 #endif
 	}
