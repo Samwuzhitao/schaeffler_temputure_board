@@ -83,7 +83,8 @@ uint8 can_receive_buffer_data[CAN_DATA_BUFFER_LEN*8];
 /* USER CODE BEGIN (2) */
 /* USER CODE END */
 
-void main(void){
+void main(void)
+{
 /* USER CODE BEGIN (3) */
 
     gioInit();

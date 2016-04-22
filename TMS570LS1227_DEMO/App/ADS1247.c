@@ -358,6 +358,38 @@ uint32_t Ads1247ReadData( spiBASE_t *spi )
 
 /******************************************************************************
   Function:
+  	    AdcSpiInit
+  Description:
+  	    Initialize Spi for ADS1247
+  Input:
+		spi : Spi port
+  Output:
+  	    Err: the error code for initialize.
+  Others:None
+******************************************************************************/
+uint16  AdcSpiInit( spiBASE_t *spi )
+{
+	uint16 Err = 1;
+	uint8 times = 0;
+
+	while( Err )
+	{
+		times++;
+
+		Err = Ads1247Init( spiREG1 );
+
+		if( times > ADS1247_ALLOW_FAILURE_NUMBER)
+		{
+			printf("ADS1247 initialize fail, please check you board! and reset your board. \r\n");
+			return Err;
+		}
+	}
+
+	return Err;
+}
+
+/******************************************************************************
+  Function:
   	    AdcInit
   Description:
   	    Initialize 2 ADS1247
@@ -368,23 +400,10 @@ uint32_t Ads1247ReadData( spiBASE_t *spi )
 ******************************************************************************/
 uint16 AdcInit( void )
 {
-	uint16 Err = 1;
-	uint8 times = 0;
+	uint16 Err = 0;
 
-	//Err = Ads1247Init( spiREG1 );
-
-	while( Err )
-	{
-		times++;
-
-		Err = Ads1247Init( spiREG3 );
-
-		if( times > ADS1247_ALLOW_FAILURE_NUMBER)
-		{
-			printf("ADS1247 initialize fail, please check you board! and reset your board. \r\n");
-			return Err;
-		}
-	}
+	Err |= AdcSpiInit( spiREG1 );
+	Err |= AdcSpiInit( spiREG3 );
 
 	return Err;
 }

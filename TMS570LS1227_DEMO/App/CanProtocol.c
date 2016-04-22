@@ -11,7 +11,7 @@
 #include "CanProtocol.h"
 #include "ADS1247.h"
 #include "LED.h"
-
+#include "DS2431.h"
 
 
 uint8 SN_ID[7] = { 0x12,0x23,0x56,0x78,0xab,0xcd,0xef };
@@ -175,7 +175,7 @@ void canSetID(canBASE_t *node, uint32 messageBox, uint32 msgBoxArbitVal)
 static uint32 CAN_Transmit(canBASE_t *node, uint32 messageBox, CanMsg *pMessage )
 {
 	CAN_EXTSTDIDTypedef CanId;
-	uint32 status;
+	uint8 Err,Status;
 
 	/* Set ID step
 	 * [1] set id
@@ -195,11 +195,14 @@ static uint32 CAN_Transmit(canBASE_t *node, uint32 messageBox, CanMsg *pMessage 
 	else
 		cansetIDType(canREG3, 1, CAN_ID_EXT);
 
-	status = canTransmit( node, messageBox, pMessage->Data );
+	Status = canTransmit( node, messageBox, pMessage->Data );
 
-	printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, CanId.Id, pMessage->IDE, status);
-
-	return status;
+	if(Status == 1)
+	{
+		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, CanId.Id, pMessage->IDE, Status);
+		Err = 0;
+	}
+	return Err;
 
 }
 
@@ -485,7 +488,8 @@ void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
 #endif
 
 #ifdef USE_CAN_TEST
-	AdcValue = 0x123456;
+	//AdcValue = 0x123456;
+	AdcValue = AdcFilterReadData( Ch );
 #endif
 
 	if( AdcValue >= 0x7FFFFF )
@@ -522,7 +526,7 @@ void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
 void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 {
 	uint8_t i;
-	uint8_t Eepromdata[4];
+	uint8_t EepromWritedata[8],EepromReaddata[8];;
 	uint8_t EepromCh = 0;
 	uint8_t EepromDataLen = 0;
 	uint8_t EepromReadWriteCmd = 0;
@@ -537,15 +541,17 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 
 	if( EepromReadWriteCmd == 0x00) // Write Cmd
 	{
-		Eepromdata[0] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[4];
-		Eepromdata[1] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[5];
-		Eepromdata[2] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[6];
-		Eepromdata[3] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[7];
+		EepromWritedata[0] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[4];
+		EepromWritedata[1] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[5];
+		EepromWritedata[2] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[6];
+		EepromWritedata[3] = CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[7];
 
 #ifdef USE_CAN_NORMAL
 		EepromBackState = Eeprom_RW_value(Eepromdata,
 								EepromCh,EepromReadWriteCmd,EepromStartAddr);
 #endif
+
+		DS2341_Write_8Byte( EepromCh, EepromStartAddr, EepromWritedata);
 
 #ifdef USE_CAN_TEST
 		EepromBackState = 0;
@@ -561,10 +567,13 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 
 #ifdef USE_CAN_TEST
 		EepromBackState = 0;
+		/*
 		Eepromdata[0] = 0x44;
 		Eepromdata[1] = 0x33;
 		Eepromdata[2] = 0x22;
 		Eepromdata[3] = 0x11;
+		*/
+		DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
 #endif
 	}
 
@@ -585,7 +594,7 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 
 	for( i=0; i< EepromDataLen; i++ )
 	{
-		CanToCanTxMessage->Data[4+i] = Eepromdata[i];
+		CanToCanTxMessage->Data[4+i] = EepromReaddata[i];
 	}
 
 	for( i=0; i<4-EepromDataLen; i++ )

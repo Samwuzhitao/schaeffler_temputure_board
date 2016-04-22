@@ -124,6 +124,7 @@ void Ads1247WriteRegisters( spiBASE_t *spi, uint8_t addr, uint8_t num, uint8_t d
 
 uint16 Ads1247Init( spiBASE_t *spi );
 uint32_t Ads1247ReadData( spiBASE_t *spi );
+uint16  AdcSpiInit( spiBASE_t *spi );
 
 uint16 AdcInit( void );
 spiBASE_t *AdcChannelSet( uint8 Ch );
