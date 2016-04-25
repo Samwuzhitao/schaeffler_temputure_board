@@ -25,6 +25,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 
+
 /*----------------------------------------------------------------------------
   insert a delay time.
  *----------------------------------------------------------------------------*/
@@ -38,6 +39,7 @@ void delay(unsigned int nCount)
  *----------------------------------------------------------------------------*/
 int main (void)  
 {     
+	uint8_t CanAutoFlg = 0;
 	
 	if (SysTick_Config(SystemCoreClock / 1000))
   { 
@@ -69,16 +71,25 @@ int main (void)
   lcd_clear ();
 	
   lcd_print ("CAN at 500kbit/s");
-
 	
-	Serial_Serial_cmd_menu();
-	
+	SetCanAutoTest( 1 );
+	/* Set board Addr = 0x02 */
+	Set_srcaddr(0x02);
+				
   while(1)
-	{ 	
-		Serial_Process();
-		
-		Can_Process();
-		
+	{ 
+			if( IsCanAutoTest() )
+			{
+				Can_eeprom_auto_test( 10 );
+				Can_Adc_auto_test(6);
+				SetCanAutoTest( 0 );
+				Serial_Serial_cmd_menu();
+			}
+			else
+			{
+					Serial_Process();
+					Can_Process();
+			}	
 	}
 } 
 

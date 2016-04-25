@@ -192,6 +192,7 @@ void SysTick_Handler(void)
   */
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
+	
 	if (CAN1->RF0R & CAN_RF0R_FMP0) // message pending ?
 	{		
 		/* Read one RxMessage from the receive data */

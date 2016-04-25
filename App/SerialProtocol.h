@@ -71,11 +71,9 @@ void Serial_Serial_cmd_menu( void );
 void Serial_to_can_test( void );
 void Serial_to_can_auto_test( uint8_t cmd, uint16_t Cnt );
 void Can_send_cmd_to_can( uint8_t CmdDta[] );
-void Can_auto_test_eeprom( uint16_t Cnt );
+void Set_srcaddr( uint8_t SrcAddr );
 
-uint8_t IsCanAutoTest( void );
-void CanAutoTestIndexAdd( void );
-uint8_t *GetCanCurrentTestCmd( void );
+
 
 #endif
 /***************************** END OF FILE ************************************/

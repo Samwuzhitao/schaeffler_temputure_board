@@ -25,9 +25,6 @@ const uint8_t compile_time[] = __TIME__;
 const uint8_t version[]="1.0";
 const uint8_t serial_number[]="0000";
 
-uint8_t CanCurrentTestCmd[9];
-uint8_t CanEepromTestReadCmd[9]  = { CAN_CMD_RW_EEPROM, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
-uint8_t CanEepromTestWriteCmd[9] = { CAN_CMD_RW_EEPROM, 0x00, 0x00, 0x00, 0x04, 0x11, 0x22, 0x33, 0x44 };
 
 /* usart peripheral variables */
 USART_MeaasgeTypedef  USART_Meaasge;
@@ -37,10 +34,6 @@ extern __IO uint8_t CanSetSrcAddr;
 uint8_t UsartRxCmdTopCounter = 0;
 uint8_t UsartRxCmdButtomCounter = 0;
 uint8_t UsartReceivecompleteFlg = 0;	
-
-uint8_t UsartCanAutoCTestFlg = 0;		
-uint16_t UsartCanAutoCTestCnt = 0;
-uint16_t UsartCanAutoCTestIndex = 0;
 
 uint8_t UsartRxCmdRingBuffer[USARTRINGBUFFERLEN][20];
 
@@ -337,6 +330,13 @@ void Serial_set_srcaddr(void)
 	printf("Set current board address is :%x \r\n",CanSetSrcAddr);
 }
 
+void Set_srcaddr( uint8_t SrcAddr )
+{
+	CanSetSrcAddr = SrcAddr;
+	printf("Set current board address is :%x \r\n",CanSetSrcAddr);
+}
+
+
 /******************************************************************************
   Function:Serial_send_cmd_to_can
   Description:
@@ -385,7 +385,7 @@ void Serial_Serial_cmd_menu( void )
 	"USART_CMD_CAN_MENU_HELP:\r\n"
 	"\t Test Cmd : 2A 2A 2A 01 33 \r\n"
 	"USART_CMD_CAN_AUTO_TEST:\r\n"
-	"\t Test Cmd : 2A 2A 2A 04 34 42(cmd) 00 01(uint16_t Cnt)\r\n"
+	"\t Test Cmd : 2A 2A 2A 01 34  \r\n"
 	);
 
 }
@@ -428,10 +428,11 @@ void Serial_to_can_test( void )
 ******************************************************************************/
 void Serial_to_can_auto_test( uint8_t cmd, uint16_t Cnt )
 {
-	uint8_t *Str;
+	//uint8_t *Str;
 	
-	UsartCanAutoCTestFlg = 1;
+	SetCanAutoTest(1);
 	
+	/*
 	switch( cmd )
 	{
 		case USART_CMD_READ_AD_TEST: 
@@ -474,95 +475,12 @@ void Serial_to_can_auto_test( uint8_t cmd, uint16_t Cnt )
 	}
 	
 	printf(" Can auto test Cmd : %s Test times : %d \r\n", Str, Cnt );
+	*/
+	
 }
 
 
-/******************************************************************************
-  Function:Serial_send_cmd_to_can
-  Description:
-  Input:None
-  Output:
-  Return:
-  Others:None
-******************************************************************************/
-void Can_send_cmd_to_can( uint8_t CmdDta[] )
-{
-	uint8_t i;
-	CanTxMsg CanToCanTxMessage;
-	USART_FrameTypedef CanCmdMessage;
-	
-	CanCmdMessage.Funcode = CmdDta[0];
-	CanCmdMessage.CanIDType = 0x00;
-	CanCmdMessage.CanDstID = 0x01;
-	
-	Serial_SetCanID(&CanToCanTxMessage,CanCmdMessage.Funcode,
-									 CanCmdMessage.CanIDType,CanCmdMessage.CanDstID);
-	
-	for( i=0; i<8; i++ )
-	{
-		CanToCanTxMessage.Data[i] = CmdDta[i+1];
-	}
-	
-	CAN_Transmit(CAN1, &CanToCanTxMessage);
-}
 
-/******************************************************************************
-  Function:Serial_send_cmd_to_can
-  Description:
-  Input:None
-  Output:
-  Return:
-  Others:None
-******************************************************************************/
-void Testdelay(unsigned int nCount)	
-{
-  for(; nCount != 0; nCount--);
-}
-/******************************************************************************
-  Function:Serial_send_cmd_to_can
-  Description:
-  Input:None
-  Output:
-  Return:
-  Others:None
-******************************************************************************/
-void Can_auto_test_eeprom( uint16_t Cnt )
-{
-	uint16_t i;
-	
-	UsartCanAutoCTestCnt = Cnt;
-	
-	for(i=0;i<9;i++)
-		CanCurrentTestCmd[i] = CanEepromTestWriteCmd[i];
-	
-	for(i=0; i<Cnt; i++)
-	{
-		Can_send_cmd_to_can( CanEepromTestWriteCmd );
-		Testdelay(45000);
 
-	}
-}
 
-void CanAutoTestIndexAdd( void )
-{
-	UsartCanAutoCTestIndex++;
-	//printf(" Auto Test Cnt = %d  OK! \r\n", UsartCanAutoCTestIndex);
-	
-	if(UsartCanAutoCTestCnt == UsartCanAutoCTestIndex)
-	{
-		UsartCanAutoCTestIndex = 0;
-		UsartCanAutoCTestFlg = 0;
-		printf(" Auto Test All %d  OK! \r\n", UsartCanAutoCTestCnt);
-	}
-}
-
-uint8_t IsCanAutoTest( void )
-{
-	return UsartCanAutoCTestFlg;
-}
-
-uint8_t *GetCanCurrentTestCmd( void )
-{
-	return CanCurrentTestCmd;
-}
 /***************************** END OF FILE ************************************/

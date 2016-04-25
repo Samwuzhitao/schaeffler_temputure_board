@@ -75,12 +75,19 @@ void Can_return_ad_msg( void );
 
 void Can_show_eeprom_msg( void );
 void Can_return_eeprom_msg( void );
-void Can_test_eeprom_msg( void);
 
 void Can_show_board_msg( void );
 void Can_return_board_msg( void );
 
 void Can_show_Calibration_temp_msg( void );
 
+void Can_eeprom_auto_test( uint16_t Cnt );
+void Can_test_eeprom_msg( uint8_t CanEepromTestCmd[] );
+void Can_Adc_auto_test( uint16_t Cnt );
+
+void SetCanAutoTest( uint8_t Flg );
+uint8_t IsCanAutoTest( void );
+void CanAutoTestOkAdd( void );
+void CanAutoTestErrAdd( void );
 
 #endif
