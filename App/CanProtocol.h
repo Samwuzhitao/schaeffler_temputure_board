@@ -14,6 +14,7 @@
 #include "stm32f10x.h"                         // STM32F10x Library Definitions 
 
 #define USE_CAN_TEST
+#define USE_CAN_AUTO_TEST
 //#define USE_CAN_NORMAL
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,11 +53,11 @@ typedef struct
 } CAN_MessageTypedef;
 
 /* Can commond code */
-#define CAN_CMD_READ_AD             1     /* Read adc value cmd code */
-#define CAN_CMD_RW_EEPROM           2     /* Read and write cmd code */
-#define CAN_CMD_CHECK_BOARD         3     /* check themself cmd code */
-#define CAN_CMD_RW_SN_ID            4     /* Read SN id cmd code     */
-#define CAN_CMD_CALIBRATION_TEMP    5     /* Calculate and set calibration temperature parameter */
+#define CAN_CMD_READ_AD             0x01     /* Read adc value cmd code */
+#define CAN_CMD_RW_EEPROM           0x02     /* Read and write cmd code */
+#define CAN_CMD_CHECK_BOARD         0x03     /* check themself cmd code */
+#define CAN_CMD_RW_SN_ID            0x04     /* Read SN id cmd code     */
+#define CAN_CMD_CALIBRATION_TEMP    0x05     /* Calculate and set calibration temperature parameter */
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,6 +75,7 @@ void Can_return_ad_msg( void );
 
 void Can_show_eeprom_msg( void );
 void Can_return_eeprom_msg( void );
+void Can_test_eeprom_msg( void);
 
 void Can_show_board_msg( void );
 void Can_return_board_msg( void );

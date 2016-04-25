@@ -11,7 +11,6 @@
 #include "platform_config.h"
 #include "stm32f10x.h"                         // STM32F10x Library Definitions  
 #include "CanProtocol.h"
-#include "SerialProtocol.h"
 #include "stdio.h"
 
 
@@ -58,9 +57,9 @@ void CAN_MessageGet( CanRxMsg *pMessage )
 	CanDstAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.DstAddr;
 	CanSrcAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.SrcAddr;
 	
-//	printf("CAN_ID.id.FunCode: %x\r\n",(CAN_ID.CanProtocolId.FunCode) & 0x1f);
-//	printf("CAN_ID.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
-//	printf("CAN_ID.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
+	//printf("CAN_ID.id.FunCode: %x\r\n",(CAN_ID.CanProtocolId.FunCode) & 0x1f);
+	//printf("CAN_ID.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
+	//printf("CAN_ID.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
 	
 	if( CanDstAddr.IDAddr == CanSetSrcAddr  )
 	{
@@ -127,30 +126,13 @@ void Can_Process( void )
 ******************************************************************************/
 void Can_cmd_parse( void )
 {
-	uint8_t IsAutoTest = 0;
-	
-	IsAutoTest = IsCanAutoTest();
-	
 	if((CanRxCmdRingBuffer[CanRxCmdButtomCounter].CanCmd & 0x10) == 0x10)
 	{
 		switch(CanRxCmdRingBuffer[CanRxCmdButtomCounter].CanCmd & 0x0f)	
 		{
 			case CAN_CMD_READ_AD:          Can_show_ad_msg();               break;
 			case CAN_CMD_CHECK_BOARD:      Can_show_board_msg();            break;
-			
-			case CAN_CMD_RW_EEPROM:     
-			{				
-				if(IsAutoTest)
-				{
-					Can_test_eeprom_msg();
-				}
-				else
-				{
-					Can_show_eeprom_msg();  
-				}						
-			}
-			break;
-			
+			case CAN_CMD_RW_EEPROM:        Can_show_eeprom_msg();           break;
 			case CAN_CMD_RW_SN_ID:         Can_show_sn_msg();               break;
 			case CAN_CMD_CALIBRATION_TEMP: Can_show_Calibration_temp_msg(); break;
 			default:                                                        break;
@@ -282,30 +264,7 @@ void Can_show_eeprom_msg( void )
 	}
 }
 
-/******************************************************************************
-  Function:Can_test_eeprom_msg
-  Description:
-  Input:None
-  Output:
-  Return:
-  Others:None
-******************************************************************************/
-void Can_test_eeprom_msg( void)
-{
-	uint8_t i,Status = 0 ;
-	uint8_t *TestCmd ;
-	
-	TestCmd = GetCanCurrentTestCmd();
-	
-	for(i=0; i<4;i++)
-	{
-		if(CanRxCmdRingBuffer[CanRxCmdButtomCounter].data[4+i] == TestCmd[5+i])
-			Status |= 1 << i;		
-	}
-	
-	if(Status == 0x0f)
-		CanAutoTestIndexAdd();
-}
+
 /******************************************************************************
   Function:Can_show_board_msg
   Description:

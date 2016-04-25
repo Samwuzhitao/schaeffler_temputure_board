@@ -67,8 +67,11 @@ int main (void)
 	ADS1247_Init();
 
   lcd_clear ();
+	
   lcd_print ("CAN at 500kbit/s");
-	printf("\r\nCan Demo test:\r\n");
+
+	
+	Serial_Serial_cmd_menu();
 	
   while(1)
 	{ 	

@@ -25,6 +25,10 @@ const uint8_t compile_time[] = __TIME__;
 const uint8_t version[]="1.0";
 const uint8_t serial_number[]="0000";
 
+uint8_t CanCurrentTestCmd[9];
+uint8_t CanEepromTestReadCmd[9]  = { CAN_CMD_RW_EEPROM, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
+uint8_t CanEepromTestWriteCmd[9] = { CAN_CMD_RW_EEPROM, 0x00, 0x00, 0x00, 0x04, 0x11, 0x22, 0x33, 0x44 };
+
 /* usart peripheral variables */
 USART_MeaasgeTypedef  USART_Meaasge;
 
@@ -32,9 +36,13 @@ extern __IO uint8_t CanSetSrcAddr;
 
 uint8_t UsartRxCmdTopCounter = 0;
 uint8_t UsartRxCmdButtomCounter = 0;
-uint8_t UsartReceivecompleteFlg = 0;		 
+uint8_t UsartReceivecompleteFlg = 0;	
 
-uint8_t UsartRxCmdRingBuffer[USARTRINGBUFFERLEN][100];
+uint8_t UsartCanAutoCTestFlg = 0;		
+uint16_t UsartCanAutoCTestCnt = 0;
+uint16_t UsartCanAutoCTestIndex = 0;
+
+uint8_t UsartRxCmdRingBuffer[USARTRINGBUFFERLEN][20];
 
 /******************************************************************************
   Function:GE_MessageGet
@@ -223,23 +231,43 @@ void Serial_cmd_parse( void )
 	switch(((USART_FrameTypedef *)\
 		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Funcode)
 	{
+		case USART_CMD_UART_MENU_HELP: 
+			{
+				Serial_Serial_cmd_menu();  
+			}
+			break;
+		
+		case USART_CMD_CAN_MENU_HELP:
+			{
+				Serial_to_can_test();      
+			}
+			break;
+		
+		case USART_CMD_CAN_AUTO_TEST:
+			{
+				Serial_to_can_auto_test(
+							UsartRxCmdRingBuffer[UsartRxCmdButtomCounter][1],
+							*(uint16_t *)(&(UsartRxCmdRingBuffer[UsartRxCmdButtomCounter][2])));
+			} 
+			break;
+			
 		case USART_CMD_COMPILE_MESSAGE:
-		{
-			Serial_show_compile_msg();
-		}
-		break;
+			{
+				Serial_show_compile_msg(); 
+			}
+			break;
 		
 		case USART_CMD_SET_CAN_SCR_ADDR:
-		{
-			Serial_set_srcaddr();
-		}
-		break;	
+			{
+				Serial_set_srcaddr();      
+			}
+			break;	
 		
 		default:
-		{
-			Serial_send_cmd_to_can();
-		}		
-		break;
+			{
+				Serial_send_cmd_to_can();  
+			}
+			break;
 	}
 	
 }
@@ -329,25 +357,212 @@ void Serial_send_cmd_to_can( void )
 	
 	for( i=0; i<8; i++ )
 	{
-		UartToCanTxMessage.Data[0] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[0];
-		UartToCanTxMessage.Data[1] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[1];
-		UartToCanTxMessage.Data[2] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[2];
-		UartToCanTxMessage.Data[3] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[3];
-		UartToCanTxMessage.Data[4] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[4];
-		UartToCanTxMessage.Data[5] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[5];
-		UartToCanTxMessage.Data[6] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[6];
-		UartToCanTxMessage.Data[7] = ((USART_FrameTypedef *)\
-		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[7];
+		UartToCanTxMessage.Data[i] = ((USART_FrameTypedef *)\
+		      (UsartRxCmdRingBuffer[UsartRxCmdButtomCounter]))->Data[i];
 	}
 	
 	CAN_Transmit(CAN1, &UartToCanTxMessage);
 }
 
+
+/******************************************************************************
+  Function:Serial_to_can_test
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Serial_Serial_cmd_menu( void )
+{
+	printf("------------------------ Uart Cmd menu ----------------------\r\n"
+	"USART_CMD_COMPILE_MESSAGE:\r\n"
+	"\t Test Cmd : 2A 2A 2A 01 30 \r\n"
+	"USART_CMD_SET_CAN_SCR_ADDR:\r\n"
+	"\t Test Cmd : 2A 2A 2A 02 31 02(addr)  \r\n"
+	"USART_CMD_UART_MENU_HELP:\r\n"
+	"\t Test Cmd : 2A 2A 2A 01 32 \r\n"
+	"USART_CMD_CAN_MENU_HELP:\r\n"
+	"\t Test Cmd : 2A 2A 2A 01 33 \r\n"
+	"USART_CMD_CAN_AUTO_TEST:\r\n"
+	"\t Test Cmd : 2A 2A 2A 04 34 42(cmd) 00 01(uint16_t Cnt)\r\n"
+	);
+
+}
+
+/******************************************************************************
+  Function:Serial_to_can_test
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Serial_to_can_test( void )
+{
+	printf("------------------------ Can Test menu -----------------------\r\n"
+	"USART_CMD_READ_AD_TEST:\r\n"
+	"\t Test Cmd : 2A 2A 2A 04 01 00 01 00(channel) \r\n"
+	"USART_CMD_READ_RW_EEPROM_TEST:\r\n"
+	"\t Read Cmd  : 2A 2A 2A 07 02 00 01 01 00 00 04 \r\n"
+	"\t Write Cmd : 2A 2A 2A 0B 02 00 01 00 00 00 04 11 22 33 44 \r\n"
+	"USART_CMD_READ_CHECK_BOARD_TEST:\r\n"
+	"\t TEDS   Cmd : 2A 2A 2A 04 03 00 01 01 \r\n"
+	"\t PT1000 Cmd : 2A 2A 2A 04 03 00 01 02 \r\n"
+	"USART_CMD_READ_RW_SN_TEST:\r\n"
+	"\t Read SN Cmd  : 2A 2A 2A 04 04 00 01 01 \r\n"
+	"\t Write SN Cmd : 2A 2A 2A 0b 04 00 01 00 11 22 33 44 55 66 77 \r\n"
+	"USART_CMD_CALIBRATION_TEMP_TEST:\r\n"
+	"\t Read Caltmp Cmd  : 2A 2A 2A 05 05 00 01 01 00  \r\n"
+	"\t Write Caltmp Cmd : 2A 2A 2A 09 05 00 01 00 00 16 63 34 77 \r\n"
+	);
+}
+
+/******************************************************************************
+  Function:Serial_to_can_test
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Serial_to_can_auto_test( uint8_t cmd, uint16_t Cnt )
+{
+	uint8_t *Str;
+	
+	UsartCanAutoCTestFlg = 1;
+	
+	switch( cmd )
+	{
+		case USART_CMD_READ_AD_TEST: 
+		{			 
+			Str = "USART_CMD_READ_AD_TEST";
+			//Can_auto_test_Adc();
+		}
+		break;
+		
+		case USART_CMD_READ_RW_EEPROM_TEST:   
+		{
+			Can_auto_test_eeprom( Cnt );      
+			Str = "USART_CMD_READ_RW_EEPROM_TEST";
+		}
+		break;
+		
+		case USART_CMD_CHECK_BOARD_TEST:  
+		{			
+			//Can_auto_test_check_borad();
+			Str = "USART_CMD_CHECK_BOARD_TEST";
+		}
+		break;
+		
+		case USART_CMD_READ_RW_SN_TEST:  
+		{			
+			//Can_auto_test_RW_SN_ID(); 
+			Str =	"USART_CMD_READ_RW_SN_TEST";	
+		}
+		break;
+		
+		case USART_CMD_CALIBRATION_TEMP_TEST:
+		{			
+			//Can_auto_test_CalTemp(); 
+			Str =	"USART_CMD_CALIBRATION_TEMP_TEST";
+		}
+		break;
+		
+		default: break;
+		
+	}
+	
+	printf(" Can auto test Cmd : %s Test times : %d \r\n", Str, Cnt );
+}
+
+
+/******************************************************************************
+  Function:Serial_send_cmd_to_can
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Can_send_cmd_to_can( uint8_t CmdDta[] )
+{
+	uint8_t i;
+	CanTxMsg CanToCanTxMessage;
+	USART_FrameTypedef CanCmdMessage;
+	
+	CanCmdMessage.Funcode = CmdDta[0];
+	CanCmdMessage.CanIDType = 0x00;
+	CanCmdMessage.CanDstID = 0x01;
+	
+	Serial_SetCanID(&CanToCanTxMessage,CanCmdMessage.Funcode,
+									 CanCmdMessage.CanIDType,CanCmdMessage.CanDstID);
+	
+	for( i=0; i<8; i++ )
+	{
+		CanToCanTxMessage.Data[i] = CmdDta[i+1];
+	}
+	
+	CAN_Transmit(CAN1, &CanToCanTxMessage);
+}
+
+/******************************************************************************
+  Function:Serial_send_cmd_to_can
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Testdelay(unsigned int nCount)	
+{
+  for(; nCount != 0; nCount--);
+}
+/******************************************************************************
+  Function:Serial_send_cmd_to_can
+  Description:
+  Input:None
+  Output:
+  Return:
+  Others:None
+******************************************************************************/
+void Can_auto_test_eeprom( uint16_t Cnt )
+{
+	uint16_t i;
+	
+	UsartCanAutoCTestCnt = Cnt;
+	
+	for(i=0;i<9;i++)
+		CanCurrentTestCmd[i] = CanEepromTestWriteCmd[i];
+	
+	for(i=0; i<Cnt; i++)
+	{
+		Can_send_cmd_to_can( CanEepromTestWriteCmd );
+		Testdelay(45000);
+
+	}
+}
+
+void CanAutoTestIndexAdd( void )
+{
+	UsartCanAutoCTestIndex++;
+	//printf(" Auto Test Cnt = %d  OK! \r\n", UsartCanAutoCTestIndex);
+	
+	if(UsartCanAutoCTestCnt == UsartCanAutoCTestIndex)
+	{
+		UsartCanAutoCTestIndex = 0;
+		UsartCanAutoCTestFlg = 0;
+		printf(" Auto Test All %d  OK! \r\n", UsartCanAutoCTestCnt);
+	}
+}
+
+uint8_t IsCanAutoTest( void )
+{
+	return UsartCanAutoCTestFlg;
+}
+
+uint8_t *GetCanCurrentTestCmd( void )
+{
+	return CanCurrentTestCmd;
+}
 /***************************** END OF FILE ************************************/

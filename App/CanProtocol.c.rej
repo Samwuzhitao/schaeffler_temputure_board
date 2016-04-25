@@ -1,0 +1,21 @@
+***************
+*** 57,65 ****
+  	CanDstAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.DstAddr;
+  	CanSrcAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.SrcAddr;
+  	
+- 	printf("CAN_ID.id.FunCode: %x\r\n",(CAN_ID.CanProtocolId.FunCode) & 0x1f);
+- 	printf("CAN_ID.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
+- 	printf("CAN_ID.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
+  	
+  	if( CanDstAddr.IDAddr == CanSetSrcAddr  )
+  	{
+--- 57,65 ----
+  	CanDstAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.DstAddr;
+  	CanSrcAddr.CanIDAddr.StdIDAddr = CAN_ID.CanProtocolId.SrcAddr;
+  	
++ //	printf("CAN_ID.id.FunCode: %x\r\n",(CAN_ID.CanProtocolId.FunCode) & 0x1f);
++ //	printf("CAN_ID.id.SrcAddr: %x\r\n",CanSrcAddr.IDAddr );
++ //	printf("CAN_ID.id.DstAddr: %x\r\n",CanDstAddr.IDAddr);
+  	
+  	if( CanDstAddr.IDAddr == CanSetSrcAddr  )
+  	{
