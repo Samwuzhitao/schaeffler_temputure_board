@@ -199,9 +199,14 @@ static uint32 CAN_Transmit(canBASE_t *node, uint32 messageBox, CanMsg *pMessage 
 
 	if(Status == 1)
 	{
-		printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, CanId.Id, pMessage->IDE, Status);
+		//printf("Massage box%2d id = %8x idtype = %1d canTransmit return status = %4d \r\n", 1, CanId.Id, pMessage->IDE, Status);
 		Err = 0;
 	}
+	else
+	{
+		canInit();
+	}
+
 	return Err;
 
 }
@@ -348,18 +353,14 @@ void Can_change_return_id( CanMsg *pMessage, uint8_t cmd , ErrTypedef ErrFlg )
 ******************************************************************************/
 void Can_Process( void )
 {
-	uint8 Err = 0;
 
 	if(CanReceivecompleteFlg == 1)
 	{
 		if(CanRxCmdTopCounter != CanRxCmdButtomCounter)
 		{
 
-			Err = Can_cmd_parse();
-
-			if( Err == 0 )
-				CanRxCmdButtomCounter++;
-
+			Can_cmd_parse();
+			CanRxCmdButtomCounter++;
 
 			if(CanRxCmdButtomCounter == CANRINGBUFFERLEN)
 			{
@@ -489,10 +490,11 @@ void Can_return_ad_msg( CanMsg *CanToCanTxMessage )
 
 #ifdef USE_CAN_TEST
 	//AdcValue = 0x123456;
+	//AdcValue = AdcReadData( Ch );
 	AdcValue = AdcFilterReadData( Ch );
 #endif
 
-	if( AdcValue >= 0x7FFFFF )
+	if( AdcValue > 0x7FFFFF )
 		Err = ReadAdcErr;
 	else
 		Err = NoErr;

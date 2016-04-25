@@ -523,6 +523,7 @@ uint32_t AdcFilterReadData( uint8 Ch )
 	}
 
 	AdcMaxValue = AdcValue[0];
+	AdcMaxTimes = 0;
 	for(i=1; i<10; i++)
 	{
 		CurrentAdcValue = AdcValue[i];
@@ -533,8 +534,9 @@ uint32_t AdcFilterReadData( uint8 Ch )
 		}
 	}
 
-	AdcMinValue = AdcValue[0];
-	for(i=1; i<10; i++)
+	AdcMinValue = AdcValue[9];
+	AdcMinTimes = 9;
+	for(i=9; i>0; i--)
 	{
 		CurrentAdcValue = AdcValue[i];
 		if( CurrentAdcValue < AdcMinValue)

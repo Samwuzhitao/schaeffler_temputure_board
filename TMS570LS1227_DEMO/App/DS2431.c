@@ -4,7 +4,7 @@
 #include "OneWire.h"
 
 
-static unsigned char  OneWire_8BIT_CRC( unsigned char Byte_a[], unsigned char NumofByte  )
+static unsigned char OneWire_8BIT_CRC( unsigned char Byte_a[], unsigned char NumofByte  )
 {
 	unsigned char i = 0;
 	unsigned char j = 0;
@@ -54,26 +54,33 @@ static unsigned short  OneWire_16BIT_CRC( unsigned short crc, unsigned char Byte
 }
 
 
-static void Read_ROM( unsigned char Data[], unsigned char NumofByte )
-{
+static unsigned char Read_ROM( unsigned char Data[], unsigned char NumofByte )
+{	
 	unsigned char i = 0;
 
-	OneWire_Init();
+	if( ERROR_NO_DEVICE == OneWire_Init() ){
+		return ERROR_NO_DEVICE;
+	}
 	OneWire_TxByte( READ_ROM );
 	for( i = 0; i < 8; i++ ){
 		Data[i] = OneWire_RxByte();
 	}
 	if( !OneWire_8BIT_CRC( Data, NumofByte ) ){
 		printf("ROM code CRC-8 Correct\n\r");
+		return OK;
+	}else{
+		return ERROR_CRC8;
 	}
 }
 
 
-static void DS2431_WriteScratchpad( unsigned short Address, unsigned char Data[], unsigned char NumofByte  )
+static unsigned char DS2431_WriteScratchpad( unsigned short Address, unsigned char Data[], unsigned char NumofByte  )
 {
 	unsigned short crc_read = 0;
 
-	OneWire_Init();
+	if( ERROR_NO_DEVICE == OneWire_Init() ){
+		return ERROR_NO_DEVICE;
+	}
 	{//Write data to scratchpad, LSB first.
 		unsigned char i = 0;
 		OneWire_TxByte( SKIP_ROM );		//ROM function command
@@ -102,20 +109,24 @@ static void DS2431_WriteScratchpad( unsigned short Address, unsigned char Data[]
 		crc = OneWire_16BIT_CRC( crc, Data, NumofByte);
 		if( crc == crc_read ){		//compares the CRC value read from device to the one it calculates.
 			printf("Data CRC-16 Correct, writing sucessful\n\r");
+			return OK; 
 		}else{
 			printf("Data CRC-16 Error, writing failed\n\r");
+			return ERROR_CRC16;
 		}
 	}
 }
 
 
-static void DS2431_ReadScratchpad( unsigned char AuthorizationData[], unsigned char Data[], unsigned char NumofByte  )
+static unsigned char DS2431_ReadScratchpad( unsigned char AuthorizationData[], unsigned char Data[], unsigned char NumofByte  )
 {
 	unsigned short crc_read = 0;
 	unsigned short Address;
 	unsigned char Reg_ES;
 
-	OneWire_Init();
+	if( ERROR_NO_DEVICE == OneWire_Init() ){
+		return ERROR_NO_DEVICE;
+	}
 	{//Read data from scratchpad, LSB first.
 		unsigned char i = 0;
 		unsigned char tmp = 0;
@@ -152,8 +163,10 @@ static void DS2431_ReadScratchpad( unsigned char AuthorizationData[], unsigned c
 		crc = OneWire_16BIT_CRC( crc, Data, NumofByte);
 		if( crc == crc_read ){		//compares the CRC value read from device to the one it calculates.
 			printf("Data CRC-16 Correct, reading sucessful\n\r");
+
 		}else{
 			printf("Data CRC-16 Error, reading failed\n\r");
+			return ERROR_CRC16;
 		}
 	}
 	{//obtain 3-byte authorzation pattern for subsequent CopyScrathpad command
@@ -161,14 +174,17 @@ static void DS2431_ReadScratchpad( unsigned char AuthorizationData[], unsigned c
 		AuthorizationData[1] = (unsigned char)(Address>>8);
 		AuthorizationData[2] = Reg_ES;
 	}
+	return OK;
 }
 
 
-static void DS2431_CopyScratchpad( unsigned char AuthorizationData[] )
+static unsigned char DS2431_CopyScratchpad( unsigned char AuthorizationData[] )
 {
 	unsigned char i = 0;
 
-	OneWire_Init();
+	if( ERROR_NO_DEVICE == OneWire_Init() ){
+		return ERROR_NO_DEVICE;
+	}
 	OneWire_TxByte( SKIP_ROM );		//ROM function command
 	OneWire_TxByte( COPY_SCRATCHPAD );	//Memory function command
 	//Write Authorization data
@@ -184,29 +200,49 @@ static void DS2431_CopyScratchpad( unsigned char AuthorizationData[] )
 		tmp = OneWire_RxByte();
 		if( (tmp==0xAA) || (tmp==0x55) ){
 			printf("copying sucessful\n\r");
+			return OK;
 		}else{
 			printf("copying failed\n\r");
+			return ERROR;
 		}
 	}
 }
 
 
-void DS2341_Write_8Byte( unsigned char DeviceNo, unsigned char Address, unsigned char Data[] )
+unsigned char DS2341_Write_8Byte( unsigned char DeviceNo, unsigned char Address, unsigned char Data[] )
 {
 	unsigned char DataTmp[8] = { 0 };
 	unsigned char AuthorizationData[3] = { 0 };
+	unsigned char tmp;
 
-	OneWireDevice_Selection( DeviceNo );
-	DS2431_WriteScratchpad( Address, Data, 8 );
-	DS2431_ReadScratchpad( AuthorizationData, DataTmp, 8 );
-	DS2431_CopyScratchpad( AuthorizationData );
+	if( ERROR == OneWireDevice_Selection( DeviceNo ) ){
+		return ERROR_DEVICE_NUM;
+	}
+	if( Address%8 != 0  ){
+		return ERROR_ADDRESS_BOUNDARY;
+	}
+	if( (tmp = DS2431_WriteScratchpad( Address, Data, 8 )) != OK ){
+		return tmp; 
+	}
+	if( (tmp = DS2431_ReadScratchpad( AuthorizationData, DataTmp, 8 )) != OK ){
+		return tmp; 
+	}
+	if( (tmp = DS2431_CopyScratchpad( AuthorizationData )) != OK ){
+		return tmp; 
+	}
+	return OK;
 }
 
-void DS2431_ReadData( unsigned char DeviceNo, unsigned short Address, unsigned char Data[], unsigned char NumofByte )
+unsigned char DS2431_ReadData( unsigned char DeviceNo, unsigned short Address, unsigned char Data[], unsigned char NumofByte )
 {
 
-	OneWireDevice_Selection( DeviceNo );
-	OneWire_Init();
+	if( ERROR == OneWireDevice_Selection( DeviceNo ) ){
+		return ERROR_DEVICE_NUM;
+	}
+
+	if( ERROR_NO_DEVICE == OneWire_Init() ){
+		return ERROR_NO_DEVICE;
+	}
 	{//Read data from memory, LSB first.
 		unsigned char i = 0;
 		OneWire_TxByte( SKIP_ROM );		//ROM function command
@@ -218,4 +254,5 @@ void DS2431_ReadData( unsigned char DeviceNo, unsigned short Address, unsigned c
 			Data[i] = OneWire_RxByte();
 		}
 	}
+	return OK;
 }
