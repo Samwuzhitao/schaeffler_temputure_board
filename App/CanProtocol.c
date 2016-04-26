@@ -165,6 +165,10 @@ void Can_cmd_parse( void )
 			default:                                                        break;
 		}
 	}
+	else
+	{
+		printf(" Command execution error, Please check the parameters or hardware! ");
+	}
 }
 
 /******************************************************************************

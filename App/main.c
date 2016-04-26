@@ -77,8 +77,8 @@ int main (void)
 	{ 
 			if( IsCanAutoTest() )
 			{
-				Can_eeprom_auto_test( 10000 );
-				Can_Adc_auto_test(10000);
+				Can_eeprom_auto_test( 100 );
+				Can_Adc_auto_test(100);
 				SetCanAutoTest( 0 );
 				Serial_Serial_cmd_menu();
 			}
