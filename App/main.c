@@ -39,7 +39,6 @@ void delay(unsigned int nCount)
  *----------------------------------------------------------------------------*/
 int main (void)  
 {     
-	uint8_t CanAutoFlg = 0;
 	
 	if (SysTick_Config(SystemCoreClock / 1000))
   { 
@@ -66,8 +65,6 @@ int main (void)
   lcd_init  ();                                   // initialise LCD
   delay(4500000);                                 // Wait for initial display (~5s)
 
-	ADS1247_Init();
-
   lcd_clear ();
 	
   lcd_print ("CAN at 500kbit/s");
@@ -80,8 +77,8 @@ int main (void)
 	{ 
 			if( IsCanAutoTest() )
 			{
-				Can_eeprom_auto_test( 10 );
-				Can_Adc_auto_test(6);
+				Can_eeprom_auto_test( 10000 );
+				Can_Adc_auto_test(10000);
 				SetCanAutoTest( 0 );
 				Serial_Serial_cmd_menu();
 			}

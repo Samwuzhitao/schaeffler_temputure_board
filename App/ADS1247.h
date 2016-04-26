@@ -76,4 +76,4 @@ uint32_t ADS1247_ReadData( void );
 void ADS1247_Init( void );
  
  #endif // __ADS1247_H__
- 
+

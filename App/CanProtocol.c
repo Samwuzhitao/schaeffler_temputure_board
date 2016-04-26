@@ -518,7 +518,7 @@ void Can_test_adc_msg( uint8_t CanAdcTestCmd[] )
 		Testdelay(45000);
 		TimeoutCnt++;
 		
-		if(TimeoutCnt > 100)
+		if(TimeoutCnt > 30)
 		{
 			UsartCanAutoTestTimeoutFlg = 1;
 			CanReceivecompleteFlg = 1;
