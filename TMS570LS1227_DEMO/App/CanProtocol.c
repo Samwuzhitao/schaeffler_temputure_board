@@ -552,11 +552,10 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 								EepromCh,EepromReadWriteCmd,EepromStartAddr);
 #endif
 
-		DS2341_Write_8Byte( EepromCh, EepromStartAddr, EepromWritedata);
+		EepromBackState = DS2341_Write_8Byte( EepromCh, EepromStartAddr, EepromWritedata);
 		DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
 
 #ifdef USE_CAN_TEST
-		EepromBackState = 0;
 #endif
 	}
 
@@ -569,18 +568,17 @@ void Can_return_eeprom_msg( CanMsg *CanToCanTxMessage )
 
 #ifdef USE_CAN_TEST
 
-		EepromBackState = 0;
-
-		DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
+		EepromBackState = DS2431_ReadData( EepromCh, EepromStartAddr, EepromReaddata, EepromDataLen );
 #endif
 	}
 
-	switch(EepromBackState)
+	if(EepromBackState == 0)
 	{
-		case 0: Err = NoErr;          break;
-		case 1: Err = ReadEepromErr;  break;
-		case 2: Err = WriteEepromErr; break;
-		default: break;
+		Err = NoErr;
+	}
+	else
+	{
+		Err = EepromErr;
 	}
 
 	Can_change_return_id( CanToCanTxMessage, CAN_CMD_RW_EEPROM ,Err);

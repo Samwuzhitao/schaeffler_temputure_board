@@ -54,6 +54,7 @@
 #include "LED.h"
 #include "ADS1247.h"
 #include "CanProtocol.h"
+#include "Version.h"
 
 /* USER CODE END */
 
@@ -102,6 +103,7 @@ void main(void)
 
 	while(1)
 	{
+
 		Can_Process();
 
 	}

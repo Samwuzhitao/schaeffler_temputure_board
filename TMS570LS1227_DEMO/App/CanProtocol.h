@@ -102,8 +102,7 @@ typedef enum
 {
 	NoErr = 0,
 	ReadAdcErr,
-	ReadEepromErr,
-	WriteEepromErr,
+	EepromErr,
 	CanTransmitErr
 } ErrTypedef;
 

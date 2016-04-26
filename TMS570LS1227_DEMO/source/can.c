@@ -1464,16 +1464,16 @@ void can3HighLevelInterrupt(void)
 	    tmpid = canGetID(canREG3, 2);
 
 		TmpIdType = canGetIDType(canREG3, 2);
-		printf("CAN_ID.pMessage->IDE: %x\r\n",TmpIdType );
+		//printf("CAN_ID.pMessage->IDE: %x\r\n",TmpIdType );
 		//printf("Massage box%2d id = %8x canIsRxMessageArrived return status = %4d \r\n", 2, tmpid, status);
 		if(TmpIdType == CAN_ID_STD)
 		{
-	        printf("CAN_ID.pMessage->StdID: %x\r\n",tmpid >> 18 );
+	        //printf("CAN_ID.pMessage->StdID: %x\r\n",tmpid >> 18 );
 			RxMessage.StdId = tmpid;
 		}
 		else
 		{
-		    printf("CAN_ID.pMessage->ExtID: %x\r\n",tmpid );
+		    //printf("CAN_ID.pMessage->ExtID: %x\r\n",tmpid );
 			RxMessage.ExtId = tmpid;
 		}
 		RxMessage.IDE = TmpIdType;
