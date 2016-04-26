@@ -376,7 +376,7 @@ uint16  AdcSpiInit( spiBASE_t *spi )
 	{
 		times++;
 
-		Err = Ads1247Init( spiREG1 );
+		Err = Ads1247Init( spi );
 
 		if( times > ADS1247_ALLOW_FAILURE_NUMBER)
 		{
@@ -523,7 +523,6 @@ uint32_t AdcFilterReadData( uint8 Ch )
 	}
 
 	AdcMaxValue = AdcValue[0];
-	AdcMaxTimes = 0;
 	for(i=1; i<10; i++)
 	{
 		CurrentAdcValue = AdcValue[i];
@@ -534,9 +533,8 @@ uint32_t AdcFilterReadData( uint8 Ch )
 		}
 	}
 
-	AdcMinValue = AdcValue[9];
-	AdcMinTimes = 9;
-	for(i=9; i>0; i--)
+	AdcMinValue = AdcValue[0];
+	for(i=1; i<10; i++)
 	{
 		CurrentAdcValue = AdcValue[i];
 		if( CurrentAdcValue < AdcMinValue)
