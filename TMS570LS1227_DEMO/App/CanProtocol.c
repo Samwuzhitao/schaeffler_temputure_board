@@ -13,8 +13,7 @@
 #include "LED.h"
 #include "DS2431.h"
 
-
-uint8 SN_ID[7] = { 0x12,0x23,0x56,0x78,0xab,0xcd,0xef };
+extern uint8 SN_ID[7];
 
 /* Private variables ---------------------------------------------------------*/
 /* can peripheral variables */

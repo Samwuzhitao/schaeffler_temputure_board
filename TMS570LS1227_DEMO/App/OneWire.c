@@ -319,18 +319,18 @@ unsigned char OneWire_Init( )
 			delay_us( 10 );
 		}
 		if( !DevicePresence ){
-			printf("No slave\n\r");
+			//printf("No slave\n\r");
 			return ERROR_NO_DEVICE;
 		}else{
-			printf("discover slave\n\r");
+			//printf("discover slave\n\r");
 
 		}
-		printf("Wait for releasing the bus:");
+		//printf("Wait for releasing the bus:");
 		delay_us( 200 );
 		if( HIGH == PinInput() ){
-			printf("Succ\n\r");
+			//printf("Succ\n\r");
 		}else{
-			printf("Fail\n\r");
+			//printf("Fail\n\r");
 		}
 	}
 	PinOutMode();

@@ -66,7 +66,7 @@ static unsigned char Read_ROM( unsigned char Data[], unsigned char NumofByte )
 		Data[i] = OneWire_RxByte();
 	}
 	if( !OneWire_8BIT_CRC( Data, NumofByte ) ){
-		printf("ROM code CRC-8 Correct\n\r");
+		//printf("ROM code CRC-8 Correct\n\r");
 		return OK;
 	}else{
 		return ERROR_CRC8;
@@ -108,10 +108,10 @@ static unsigned char DS2431_WriteScratchpad( unsigned short Address, unsigned ch
 		crc = OneWire_16BIT_CRC( 0, DataTmp_a, sizeof( DataTmp_a ) );
 		crc = OneWire_16BIT_CRC( crc, Data, NumofByte);
 		if( crc == crc_read ){		//compares the CRC value read from device to the one it calculates.
-			printf("Data CRC-16 Correct, writing sucessful\n\r");
+			//printf("Data CRC-16 Correct, writing sucessful\n\r");
 			return OK; 
 		}else{
-			printf("Data CRC-16 Error, writing failed\n\r");
+			//printf("Data CRC-16 Error, writing failed\n\r");
 			return ERROR_CRC16;
 		}
 	}
@@ -162,10 +162,10 @@ static unsigned char DS2431_ReadScratchpad( unsigned char AuthorizationData[], u
 		crc = OneWire_16BIT_CRC( 0, DataTmp_a, sizeof( DataTmp_a ) );
 		crc = OneWire_16BIT_CRC( crc, Data, NumofByte);
 		if( crc == crc_read ){		//compares the CRC value read from device to the one it calculates.
-			printf("Data CRC-16 Correct, reading sucessful\n\r");
+			//printf("Data CRC-16 Correct, reading sucessful\n\r");
 
 		}else{
-			printf("Data CRC-16 Error, reading failed\n\r");
+			//printf("Data CRC-16 Error, reading failed\n\r");
 			return ERROR_CRC16;
 		}
 	}
@@ -199,10 +199,10 @@ static unsigned char DS2431_CopyScratchpad( unsigned char AuthorizationData[] )
 		unsigned char tmp = 0;
 		tmp = OneWire_RxByte();
 		if( (tmp==0xAA) || (tmp==0x55) ){
-			printf("copying sucessful\n\r");
+			//printf("copying sucessful\n\r");
 			return OK;
 		}else{
-			printf("copying failed\n\r");
+			//printf("copying failed\n\r");
 			return ERROR;
 		}
 	}
