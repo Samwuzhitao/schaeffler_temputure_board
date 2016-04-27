@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="273" key="DIALOG_WIDTH"/>
+		<item value="336" key="DIALOG_Y_ORIGIN"/>
+		<item value="855" key="DIALOG_X_ORIGIN"/>
+		<item value="399" key="DIALOG_HEIGHT"/>
+		<item value="1|微软雅黑|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|微软雅黑" key="DIALOG_FONT_NAME"/>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="true" key="wrap"/>
+		<item value="false" key="casesensitive"/>
+		<item value="false" key="isRegEx"/>
+		<item value="false" key="incremental"/>
+		<item value="false" key="wholeword"/>
+		<item value="" key="selection"/>
+		<list key="findhistory">
+			<item value="slave&#x0A;"/>
+			<item value="\n\r"/>
+			<item value="CanReceivecompleteFlg"/>
+			<item value="Can_cmd_parse"/>
+			<item value="CanToCanTxMessage."/>
+			<item value="{1663 , 3477}"/>
+			<item value="CAN_Transmit"/>
+			<item value="-"/>
+		</list>
+		<list key="replacehistory">
+			<item value="\r\n"/>
+			<item value="CanToCanTxMessage-&gt;"/>
+			<item value="{1 , 0}"/>
+			<item value=""/>
+			<item value="LV138CH2"/>
+			<item value="LV138CH"/>
+			<item value="SpiReadWriteData"/>
+			<item value="SpiSetCs"/>
+		</list>
+	</section>
+</section>

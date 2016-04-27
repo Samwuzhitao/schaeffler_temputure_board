@@ -1,0 +1,13 @@
+.settings/
+Debug/
+.launches/
+Objects/
+Listings/
+.ccsproject
+.cproject
+.project
+Debug/TMS570LS1227_DEMO.map
+*.map
+*.bin
+*.xml
+
