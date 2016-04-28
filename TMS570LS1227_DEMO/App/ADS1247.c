@@ -14,42 +14,42 @@
 
 AdcCalibrationTypedef Ads1247PositiveCalibration[16] =
 {
-	{1663 , 3477},   // Ads1247 channel 0 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 1 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 2 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 3 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 4 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 5 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 6 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 7 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 8 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 9 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 10 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 11 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 12 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 13 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 14 Calibration parameter
-	{1663 , 3477},   // Ads1247 channel 15 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 0 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 1 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 2 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 3 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 4 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 5 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 6 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 7 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 8 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 9 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 10 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 11 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 12 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 13 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 14 Calibration parameter
+	{1000 , 0},   // Ads1247 channel 15 Calibration parameter
 };
 
 AdcCalibrationTypedef Ads1247NegativeCalibration[16] =
 {
-	{1 , 0},   // Ads1247 channel 0 Calibration parameter
-	{1 , 0},   // Ads1247 channel 1 Calibration parameter
-	{1 , 0},   // Ads1247 channel 2 Calibration parameter
-	{1 , 0},   // Ads1247 channel 3 Calibration parameter
-	{1 , 0},   // Ads1247 channel 4 Calibration parameter
-	{1 , 0},   // Ads1247 channel 5 Calibration parameter
-	{1 , 0},   // Ads1247 channel 6 Calibration parameter
-	{1 , 0},   // Ads1247 channel 7 Calibration parameter
-	{1 , 0},   // Ads1247 channel 8 Calibration parameter
-	{1 , 0},   // Ads1247 channel 9 Calibration parameter
-	{1 , 0},   // Ads1247 channel 10 Calibration parameter
-	{1 , 0},   // Ads1247 channel 11 Calibration parameter
-	{1 , 0},   // Ads1247 channel 12 Calibration parameter
-	{1 , 0},   // Ads1247 channel 13 Calibration parameter
-	{1 , 0},   // Ads1247 channel 14 Calibration parameter
-	{1 , 0},   // Ads1247 channel 15 Calibration parameter
+	{1000, 0},   // Ads1247 channel 0 Calibration parameter
+	{1000, 0},   // Ads1247 channel 1 Calibration parameter
+	{1000, 0},   // Ads1247 channel 2 Calibration parameter
+	{1000, 0},   // Ads1247 channel 3 Calibration parameter
+	{1000, 0},   // Ads1247 channel 4 Calibration parameter
+	{1000, 0},   // Ads1247 channel 5 Calibration parameter
+	{1000, 0},   // Ads1247 channel 6 Calibration parameter
+	{1000, 0},   // Ads1247 channel 7 Calibration parameter
+	{1000, 0},   // Ads1247 channel 8 Calibration parameter
+	{1000, 0},   // Ads1247 channel 9 Calibration parameter
+	{1000, 0},   // Ads1247 channel 10 Calibration parameter
+	{1000, 0},   // Ads1247 channel 11 Calibration parameter
+	{1000, 0},   // Ads1247 channel 12 Calibration parameter
+	{1000, 0},   // Ads1247 channel 13 Calibration parameter
+	{1000, 0},   // Ads1247 channel 14 Calibration parameter
+	{1000, 0},   // Ads1247 channel 15 Calibration parameter
 };
 
 spiDAT1_t dataconfig1_t;
@@ -278,8 +278,8 @@ uint16 Ads1247Init( spiBASE_t *spi )
 	if( ReadRegister != WriteRegister )
 		Err = 1 << ADS1247_REG_VBIAS;
 
-	// Set Internal OSC, (IDAC)Internal reference, (ADC)OnBoard reference
-	WriteRegister = 0x30;
+	// Set Internal OSC, (IDAC)REF0 reference, (ADC)OnBoard reference
+	WriteRegister = 0x20;
 	Ads1247WriteRegister( spi, ADS1247_REG_MUX1, WriteRegister );
 	//printf("ADS1247_REG_MUX1 write Register = %d", WriteRegister);
 	Ads1247Delay(ADS1247_WRITE_REG_DELAYMS);
